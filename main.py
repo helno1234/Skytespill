@@ -1,48 +1,40 @@
 import pygame as pg
+from settings import *
+
+class Spillbrett:
+    def __init__(self):
+        pass
 
 
-# Konstanter
-WIDTH = 400
-HEIGHT = 600
-
-# Størrelsen til vinduet
-SIZE = (WIDTH, HEIGHT)
-
-# Frames per second (bilder per sekund)
-FPS = 60
-
-# Farger (RGB)
-WHITE = (255, 255, 255)
 
 # Initiere pygame
 pg.init()
 
-# Lager en overflate (surface) vi kan tegne på
-surface = pg.display.set_mode(SIZE)
+# Lager en overflate vi kan tegne på
+overflate = pg.display.set_mode(STØRRELSE)
 
 # Lager en klokke
-clock = pg.time.Clock()
-
-
-
-
+klokke = pg.time.Clock()
 
 # Variabel som styrer om spillet skal kjøres
-run = True
+kjør = True
+
+# Henter sky-bildet og endrer størrelsen slik at den passer til skjerm, uavhengig av størrelse
+himmel_bilde = pg.transform.scale(pg.image.load("himmel_skytespill.jpeg"), (BREDDE, HØYDE))
+
+overflate.blit(himmel_bilde, (0, 0))
 
 # Spill-løkken
-while run:
+while kjør:
     
     # Sørger for at løkken kjører i korrekt hastighet
-    clock.tick(FPS)
-    
-    surface.fill(WHITE)
+    klokke.tick(FPS)
   
     # Går gjennom henselser (events)
-    for event in pg.event.get():
+    for hendelse in pg.event.get():
         # Sjekker om vi ønsker å lukke vinduet
-        if event.type == pg.QUIT:
-            run = False # Spillet skal avsluttes
+        if hendelse.type == pg.QUIT:
+            kjør = False # Spillet skal avsluttes
             
     # "Flipper" displayet for å vise hva vi har tegnet
     pg.display.flip()
