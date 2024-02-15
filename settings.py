@@ -10,7 +10,7 @@ FPS = 60
 
 # Farger (RGB)
 HVIT = (255, 255, 255)
-GRÅ = (75, 75, 75)
+GRÅ = (50, 50, 50)
 
 # Platformer
 PLATFORM_HØYDE = 25

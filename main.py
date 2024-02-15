@@ -21,13 +21,14 @@ class Spillbrett:
         self.kjører = True
 
     def ny(self):
+        platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE)) 
         
         # Lager plattformer
         while len(platform_liste) < 5:
-            print("1")
+            
             # Lager ny plattform
             ny_platform = Platform(
-                random.randint(10, BREDDE-PLATFORM_BREDDE-10),
+                random.randint(PLATFORM_BREDDE, BREDDE-PLATFORM_BREDDE),
                 random.randint(50, HØYDE-PLATFORM_HØYDE-50),
                 PLATFORM_BREDDE,
                 PLATFORM_HØYDE
