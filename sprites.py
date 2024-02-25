@@ -1,6 +1,95 @@
 import pygame as pg
 from settings import *
 
+class Spiller:
+    def __init__(self):
+        self.bilde = pg.Surface((SPILLER_BREDDE, SPILLER_HØYDE))
+        self.bilde.fill(GRØNN)
+        self.rect = self.bilde.get_rect()
+        self.rect.center = (
+            # BREDDE//2 - SPILLER_BREDDE//2,
+            # HØYDE//2 - SPILLER_HØYDE//2
+            10,10
+        )
+        
+        self.pos = list(self.rect.center)
+        self.fart = [0, 0]
+        self.aks = [0, 0]
+        
+        #print(self.rect)
+    
+    # Metode for hopping
+    def hopp(self):
+        self.fart[1] = -20
+        
+    def oppdater(self):
+        # Friksjon
+        self.aks[0] += self.fart[0]*SPILLER_FRIKSJON
+                
+        # Bevegelseslikning i x-retning
+        self.fart[0] += self.aks[0]
+        self.pos[0] += self.fart[0] + 0.5*self.aks[0]
+        
+        # Sjekker om spilleren er utenfor spillbrettet 
+        if self.pos[0] < 0:
+            self.pos[0] = 0
+            self.fart[0] = 0
+
+        if self.pos[0] > BREDDE - SPILLER_BREDDE:
+            self.pos[0] = BREDDE - SPILLER_BREDDE
+            self.fart[0] = 0
+        
+        if self.pos[1] < 0:
+            self.pos[1] = 0
+            self.fart[1] = 0
+            
+        print(self.pos[1])
+        
+        # Sjekker om spilleren er ved siden av platformene på siden av spillebrettet
+        if self.pos[0] < PLATFORM_BREDDE and self.pos[1] > 475:
+            self.pos[0] = PLATFORM_BREDDE
+            self.fart[0] = 0
+        if self.pos[0] > BREDDE - PLATFORM_BREDDE - SPILLER_BREDDE and self.pos[1] > 475:
+            self.pos[0] = BREDDE - PLATFORM_BREDDE - SPILLER_BREDDE
+            self.fart[0] = 0
+        
+        # Bevegelseslikning i y-retning
+        self.fart[1] += self.aks[1]
+        self.pos[1] += self.fart[1] + 0.5*self.aks[1]
+        
+        # Oppdaterer rektangelets posisjon
+        self.rect.x = self.pos[0]
+        self.rect.y = self.pos[1]
+
+# Klasse for spillobjekt som bruker piltaster
+class SpillerPiler(Spiller):    
+    def oppdater(self):
+        super().oppdater()
+        self.aks = [0, GRAV]
+        # Henter tastene fra tastaturet
+        keys = pg.key.get_pressed()
+        
+        if keys[pg.K_LEFT]:
+            self.aks[0] = -SPILLER_AKS
+            
+        if keys[pg.K_RIGHT]:
+            self.aks[0] = SPILLER_AKS
+            
+# Klasse for spillobjekt som bruker piltaster
+class SpillerTaster(Spiller):    
+    def oppdater(self):
+        super().oppdater()
+        self.aks = [0, GRAV]
+        # Henter tastene fra tastaturet
+        keys = pg.key.get_pressed()
+        
+        if keys[pg.K_a]:
+            self.aks[0] = -SPILLER_AKS
+            
+        if keys[pg.K_d]:
+            self.aks[0] = SPILLER_AKS
+    
+
 class Platform:
     def __init__(self, x, y, b, h):
         self.bilde = pg.Surface((b, h))
