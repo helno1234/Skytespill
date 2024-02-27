@@ -1,4 +1,5 @@
 import pygame as pg
+import time
 from settings import *
 
 class Spiller:
@@ -7,9 +8,7 @@ class Spiller:
         self.bilde.fill(GRØNN)
         self.rect = self.bilde.get_rect()
         self.rect.center = (
-            # BREDDE//2 - SPILLER_BREDDE//2,
-            # HØYDE//2 - SPILLER_HØYDE//2
-            10,10
+            10, 10
         )
         
         self.pos = list(self.rect.center)
@@ -43,7 +42,7 @@ class Spiller:
             self.pos[1] = 0
             self.fart[1] = 0
             
-        print(self.pos[1])
+        # print(self.pos[1])
         
         # Sjekker om spilleren er ved siden av platformene på siden av spillebrettet
         if self.pos[0] < PLATFORM_BREDDE and self.pos[1] > 475:
@@ -60,9 +59,19 @@ class Spiller:
         # Oppdaterer rektangelets posisjon
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
+        
+        
 
 # Klasse for spillobjekt som bruker piltaster
-class SpillerPiler(Spiller):    
+class SpillerPiler(Spiller):
+    def __init__(self):
+        super().__init__()
+        self.rect.center = (
+        BREDDE - SPILLER_BREDDE - 10,
+        10
+        )
+        
+        self.pos = list(self.rect.center)
     def oppdater(self):
         super().oppdater()
         self.aks = [0, GRAV]
@@ -96,6 +105,35 @@ class Platform:
         self.bilde.fill(GRÅ)
         
         self.rect = self.bilde.get_rect()
+        
         # Setter x- og y-posisjonen til platformen
         self.rect.x = x
         self.rect.y = y
+        
+class Kule:
+    def __init__(self):
+        self.senter = (30, 30)
+        self.radius = 0
+        
+        self.skutt = False
+        
+        self.fart = [0,0]
+
+    
+    # NOE FEIL HER
+    def oppdater(self):
+        print(self.senter)
+        if self.skutt == True:
+            self.radius = 10
+            self.fart = [5, 0]
+            tid = 1  # Endre tidssteg etter behov
+            self.senter = (self.senter[0] + self.fart[0] * tid, self.senter[1])
+            
+            # Sjekk om kulen er utenfor skjermen
+            if self.senter[0] < 0 or self.senter[0] > BREDDE:
+                self.radius = 0	# Kulern blir borte
+                self.skutt = False
+    
+    
+    
+    

@@ -9,6 +9,7 @@ STØRRELSE = (BREDDE, HØYDE)
 FPS = 60
 
 # Farger (RGB)
+SVART = (0, 0, 0)
 HVIT = (255, 255, 255)
 GRÅ = (50, 50, 50)
 GRØNN = (0, 255, 0)

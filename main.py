@@ -5,7 +5,8 @@ from sprites import *
 
 # Lager en liste til platformene, og legger til bakken
 platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
-spillere = []
+
+kule_liste = []
 
 class Spillbrett:
     def __init__(self):
@@ -20,13 +21,14 @@ class Spillbrett:
         
         # Variabel som styrer om spillet skal kjøres
         self.kjører = True
+        
+        #self.kule = Kule()
 
     def ny(self):
         # Lager spiller-objekt
         self.spiller_1 = SpillerPiler()
         self.spiller_2 = SpillerTaster()
-        spillere.append(self.spiller_1)
-        spillere.append(self.spiller_2)
+        self.spillere = [self.spiller_1, self.spiller_2]
         
         platform_liste.append(Platform(0, 475, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 475, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
@@ -69,7 +71,8 @@ class Spillbrett:
             self.oppdater()
             self.tegne()
             
-    def hendelser(self):       
+    def hendelser(self):
+        
         # Går gjennom henselser (events)
         for hendelse in pg.event.get():
             # Sjekker om vi ønsker å lukke vinduet
@@ -81,16 +84,37 @@ class Spillbrett:
             if hendelse.type == pg.KEYDOWN:
                 # Spilleren skal hoppe hvis vi trykker på mellomromstasten
                 if hendelse.key == pg.K_UP:
-                    self.spiller_1.hopp()
+                    if self.spiller_1.fart[1] == 0:
+                        self.spiller_1.hopp()
+                
+                if (hendelse.key == pg.K_t):
+                    self.opprett_kule()
+                        
+
                 if hendelse.key == pg.K_w:
-                    self.spiller_2.hopp()
-    
+                    if self.spiller_2.fart[1] == 0:
+                        self.spiller_2.hopp()
+                        
+    def opprett_kule(self):
+        ny_kule = Kule()
+        ny_kule.skutt = True
+        kule_liste.append(ny_kule)
+        self.kule = kule_liste[-1]
+        
     def oppdater(self):
         self.spiller_1.oppdater()
         self.spiller_2.oppdater()
+        for kule in kule_liste:
+            kule.oppdater()
+            if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
+                kule_liste.remove(kule)
+            """
+            elif kule.senter[0] :
+                kule_liste.remove(kule)
+            """
         
         # Sjekker om spillerne faller
-        for spiller in spillere:
+        for spiller in self.spillere:
             if spiller.fart[1] > 0:
                 kollisjon = False
             
@@ -118,6 +142,10 @@ class Spillbrett:
         # Tegner spilleren
         self.overflate.blit(self.spiller_1.bilde, self.spiller_1.pos)
         self.overflate.blit(self.spiller_2.bilde, self.spiller_2.pos)
+        
+        for kule in kule_liste:
+        # Tegner kule
+            pg.draw.circle(self.overflate, SVART, kule.senter, kule.radius)
         
         # "Flipper" displayet for å vise hva vi har tegnet
         pg.display.flip()
