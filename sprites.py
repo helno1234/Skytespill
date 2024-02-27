@@ -112,19 +112,27 @@ class Platform:
         
 class Kule:
     def __init__(self):
-        self.senter = (30, 30)
-        self.radius = 0
+        self.senter = (30, 500)
+        self.radius = 10
+        
+        # Til "rektangelet"
+        self.x = self.senter[0]
+        self.y = self.senter[1]
+        self.bredde = self.radius
+        self.høyde = self.radius
         
         self.skutt = False
         
         self.fart = [0,0]
+        
+        self.rektangel = self.oppdater_rektangel()
 
-    
-    # NOE FEIL HER
+    def oppdater_rektangel(self):
+         return pg.Rect(self.x, self.y, self.bredde, self.høyde)
+
     def oppdater(self):
-        print(self.senter)
-        if self.skutt == True:
-            self.radius = 10
+        if self.skutt:
+            self.rektangel = pg.Rect(self.senter[0], self.senter[1], self.radius, self.radius)
             self.fart = [5, 0]
             tid = 1  # Endre tidssteg etter behov
             self.senter = (self.senter[0] + self.fart[0] * tid, self.senter[1])
@@ -133,7 +141,13 @@ class Kule:
             if self.senter[0] < 0 or self.senter[0] > BREDDE:
                 self.radius = 0	# Kulern blir borte
                 self.skutt = False
+              
+            self.x += self.fart[0]
+            self.rektangel = self.oppdater_rektangel()
     
+    def kollisjon(self, objekt):
+        return self.rektangel.colliderect(objekt.rect)
+
     
     
     

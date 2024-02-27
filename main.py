@@ -108,10 +108,11 @@ class Spillbrett:
             kule.oppdater()
             if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
                 kule_liste.remove(kule)
-            """
-            elif kule.senter[0] :
+                print(kule.kollisjon(self.spiller_1))
+            elif kule.kollisjon(self.spiller_1) or kule.kollisjon(self.spiller_2):
                 kule_liste.remove(kule)
-            """
+                print("skutt")
+
         
         # Sjekker om spillerne faller
         for spiller in self.spillere:
