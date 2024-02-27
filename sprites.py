@@ -8,7 +8,7 @@ class Spiller:
         self.bilde.fill(GRØNN)
         self.rect = self.bilde.get_rect()
         self.rect.center = (
-            10, 10
+            10, 0
         )
         
         self.pos = list(self.rect.center)
@@ -58,10 +58,9 @@ class Spiller:
         self.fart[1] += self.aks[1]
         self.pos[1] += self.fart[1] + 0.5*self.aks[1]
         
-        # Oppdaterer rektangelets posisjon
+        # Oppdaterer spillerens posisjon
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
-        
         
 
 # Klasse for spillobjekt som bruker piltaster
@@ -113,13 +112,13 @@ class Platform:
         self.rect.y = y
         
 class Kule:
-    def __init__(self):
-        self.senter = (30, 500)
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        
+        self.senter = (self.x, self.y)
         self.radius = 10
         
-        # Til "rektangelet"
-        self.x = self.senter[0]
-        self.y = self.senter[1]
         self.bredde = self.radius
         self.høyde = self.radius
         

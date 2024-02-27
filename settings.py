@@ -1,6 +1,6 @@
 # Konstanter
 BREDDE = 1200
-HØYDE = 700
+HØYDE = 600
 
 # Størrelsen til vinduet
 STØRRELSE = (BREDDE, HØYDE)
