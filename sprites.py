@@ -15,6 +15,8 @@ class Spiller:
         self.fart = [0, 0]
         self.aks = [0, 0]
         
+        self.poeng = 0
+        
         #print(self.rect)
     
     # Metode for hopping
