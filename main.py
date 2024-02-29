@@ -1,23 +1,15 @@
 import pygame as pg
-import random
+import random, time
 from settings import *
 from sprites import *
 
 # Lager en liste til platformene, og legger til bakken
 platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
 
-# Tom liste til å legge inn kule_objekter
-kule_liste = []
-
 class Spillbrett:
     def __init__(self):
         # Initiere pygame
         pg.init()
-        
-        """
-        # Spiller ikke spillet enda
-        self.spiller_spill = False
-        """
         
         # Lager en klokke
         self.klokke = pg.time.Clock()
@@ -27,12 +19,8 @@ class Spillbrett:
         
         # Variabel som styrer om spillet skal kjøres
         self.kjører = True
-    
-        self.poeng_1 = 0
-        self.poeng_2 = 0
         
-        self.ammo_1 = 10
-        self.ammo_2 = 10
+        self.start_tid = time.time()
    
     def ny_runde_innstillinger(self):
         self.poeng_1 = 0
@@ -80,31 +68,23 @@ class Spillbrett:
         self.kjør()
     
     def kjør(self):
-        """
-        for hendelse in pg.event.get():
-            if hendelse.type == pg.KEYDOWN:
-                if hendelse.key == pg.K_RETURN:
-                    self.spiller_spill = True
-        """
         self.ny_runde_innstillinger()
         
+        ny_tid = time.time()
         self.spiller_spill = True
+        """
+        if ny_tid - self.start_tid < SPILLRUNDE_TID:
+            self.spiller_spill = True
+        else:
+            print("SPILLE!")
+        """
         
         while self.spiller_spill:
             self.klokke.tick(FPS)
             self.hendelser()
             self.oppdater()
             self.tegne()
-            
-        """    
-            nå_tid = time.time()
-            
-            if nå_tid - start_tid >= SPILLRUNDER_TID:
-                self.spiller_spill = False
-            
-        self.overflate.fill(GRØNN)
-        print("SPILL")
-        """   
+        
     def hendelser(self):
         # Går gjennom hendelser (events)
         for hendelse in pg.event.get():
@@ -149,31 +129,30 @@ class Spillbrett:
                         
                 if hendelse.key == pg.K_RETURN:
                     self.spiller_spill = False
-                    print("SP")
                         
     def opprett_kule(self, spiller, høyre = True):
         ny_kule = Kule(spiller.rect.x + SPILLER_BREDDE, spiller.rect.y + SPILLER_HØYDE//2)
         ny_kule.skutt = True
         if høyre:
             ny_kule.venstre = False
-        kule_liste.append(ny_kule)
-        self.kule = kule_liste[-1]
+        spiller.kule_liste.append(ny_kule)
+        self.kule = spiller.kule_liste[-1]
         
     def oppdater(self):
         self.spiller_1.oppdater()
         self.spiller_2.oppdater()
         
-        for kule in kule_liste:
+        for kule in self.spiller_1.kule_liste:
             kule.oppdater()
             if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
-                kule_liste.remove(kule)
+                self.spiller_1.kule_liste.remove(kule)
                 
-            for spiller in self.spillere:
+            #for spiller in self.spillere:
                 # print(kule.rektangel)
-                if kule.kollisjon(spiller):
-                    kule_liste.remove(kule)
-                    spiller.poeng += 1
-                    print(f"Spiller 1: {self.spiller_1.poeng}. Spiller 2: {self.spiller_2.poeng}")
+            if kule.kollisjon(self.spiller_2):
+                self.spiller_1.kule_liste.remove(kule)
+                self.spiller_1.poeng += 1
+                print(f"Spiller 1: {self.spiller_1.poeng}. Spiller 2: {self.spiller_2.poeng}")
         
         # Sjekker om spillerne faller
         for spiller in self.spillere:
@@ -205,7 +184,11 @@ class Spillbrett:
         self.overflate.blit(self.spiller_1.bilde, self.spiller_1.pos)
         self.overflate.blit(self.spiller_2.bilde, self.spiller_2.pos)
         
-        for kule in kule_liste:
+        for kule in self.spiller_1.kule_liste:
+        # Tegner kule
+            pg.draw.circle(self.overflate, SVART, kule.senter, kule.radius)
+        
+        for kule in self.spiller_2.kule_liste:
         # Tegner kule
             pg.draw.circle(self.overflate, SVART, kule.senter, kule.radius)
         

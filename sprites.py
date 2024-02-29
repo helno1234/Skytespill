@@ -16,6 +16,9 @@ class Spiller:
         self.aks = [0, 0]
         
         self.poeng = 0
+        
+        # Tom liste til å legge inn kule_objekter
+        self.kule_liste = []
     
     # Metode for hopping
     def hopp(self):
