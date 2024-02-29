@@ -4,8 +4,9 @@ from settings import *
 
 class Spiller:
     def __init__(self):
-        self.bilde = pg.Surface((SPILLER_BREDDE, SPILLER_HØYDE))
-        self.bilde.fill(GRØNN)
+        # self.bilde = pg.Surface((SPILLER_BREDDE, SPILLER_HØYDE))
+        self.bilde = pg.transform.scale(pg.image.load("mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        # self.bilde.fill(GRØNN)
         self.rect = self.bilde.get_rect()
         self.rect.center = (
             10, 0
@@ -142,6 +143,7 @@ class Kule:
             self.rektangel = self.oppdater_rektangel()
     
     def kollisjon(self, objekt):
+        print(self.rektangel, self.senter)
         return self.rektangel.colliderect(objekt.rect)
 
     

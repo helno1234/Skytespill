@@ -147,11 +147,22 @@ class Spillbrett:
             if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
                 self.spiller_1.kule_liste.remove(kule)
                 
-            #for spiller in self.spillere:
-                # print(kule.rektangel)
             if kule.kollisjon(self.spiller_2):
                 self.spiller_1.kule_liste.remove(kule)
                 self.spiller_1.poeng += 1
+                print(f"Spiller 1: {self.spiller_1.poeng}. Spiller 2: {self.spiller_2.poeng}")
+        
+        for kule in self.spiller_2.kule_liste:
+            kule.oppdater()
+            if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
+                self.spiller_2.kule_liste.remove(kule)
+                
+            print(self.spiller_1.rect)
+            print(kule.senter)
+
+            if kule.kollisjon(self.spiller_1):
+                self.spiller_2.kule_liste.remove(kule)
+                self.spiller_2.poeng += 1
                 print(f"Spiller 1: {self.spiller_1.poeng}. Spiller 2: {self.spiller_2.poeng}")
         
         # Sjekker om spillerne faller
