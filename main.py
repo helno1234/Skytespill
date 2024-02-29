@@ -21,15 +21,20 @@ class Spillbrett:
         self.kjører = True
         
         self.start_tid = time.time()
-   
-    def ny_runde_innstillinger(self):
+        
+        self.spiller_spill = True
+        
+        # Poeng til spiller_1 og spiller_2
         self.poeng_1 = 0
         self.poeng_2 = 0
-        
+   
+    def ny_runde_innstillinger(self):
+        # Hvor mange kuler de kan skyte per runde
         self.ammo_1 = 10
         self.ammo_2 = 10
 
     def ny(self):
+        self.ny_runde_innstillinger()
         # Lager spiller-objekt
         self.spiller_2 = SpillerH()
         self.spiller_1 = SpillerV()
@@ -68,22 +73,28 @@ class Spillbrett:
         self.kjør()
     
     def kjør(self):
-        self.ny_runde_innstillinger()
         
         ny_tid = time.time()
-        self.spiller_spill = True
-        """
-        if ny_tid - self.start_tid < SPILLRUNDE_TID:
-            self.spiller_spill = True
-        else:
-            print("SPILLE!")
-        """
-        
-        while self.spiller_spill:
-            self.klokke.tick(FPS)
-            self.hendelser()
-            self.oppdater()
-            self.tegne()
+        #self.spiller_spill = True
+        if self.spiller_spill:
+            while ny_tid - self.start_tid >= SPILLRUNDER_TID:
+                self.overflate.fill((0, 0, 0))
+                pg.display.flip()
+
+                for hendelse in pg.event.get():
+                    if hendelse.type == pg.KEYDOWN and hendelse.key == pg.K_RETURN:
+                        self.start_tid = time.time()
+                            # venter_på_enter = False
+                
+                        self.ny_runde_innstillinger()
+            
+            while ny_tid - self.start_tid < SPILLRUNDER_TID:
+                self.klokke.tick(FPS)
+                self.hendelser()
+                self.oppdater()
+                self.tegne()
+                
+                ny_tid = time.time()
         
     def hendelser(self):
         # Går gjennom hendelser (events)
@@ -92,6 +103,7 @@ class Spillbrett:
             if hendelse.type == pg.QUIT:
                 if self.spiller_spill:
                     self.spiller_spill = False
+
                 self.kjører = False # Spillet skal avsluttes
                 
             if hendelse.type == pg.KEYDOWN:
@@ -127,9 +139,6 @@ class Spillbrett:
                     if self.spiller_2.fart[1] == 0:
                         self.spiller_2.hopp()
                         
-                if hendelse.key == pg.K_RETURN:
-                    self.spiller_spill = False
-                        
     def opprett_kule(self, spiller, høyre = True):
         ny_kule = Kule(spiller.rect.x + SPILLER_BREDDE, spiller.rect.y + SPILLER_HØYDE//2)
         ny_kule.skutt = True
@@ -149,8 +158,8 @@ class Spillbrett:
                 
             if kule.kollisjon(self.spiller_2):
                 self.spiller_1.kule_liste.remove(kule)
-                self.spiller_1.poeng += 1
-                print(f"Spiller 1: {self.spiller_1.poeng}. Spiller 2: {self.spiller_2.poeng}")
+                self.poeng_1 += 1
+                print(f"Spiller 1: {self.poeng_1}. Spiller 2: {self.poeng_2}")
         
         for kule in self.spiller_2.kule_liste:
             kule.oppdater()
@@ -162,8 +171,8 @@ class Spillbrett:
 
             if kule.kollisjon(self.spiller_1):
                 self.spiller_2.kule_liste.remove(kule)
-                self.spiller_2.poeng += 1
-                print(f"Spiller 1: {self.spiller_1.poeng}. Spiller 2: {self.spiller_2.poeng}")
+                self.poeng_2 += 1
+                print(f"Spiller 1: {self.poeng_1}. Spiller 2: {self.poeng_2}")
         
         # Sjekker om spillerne faller
         for spiller in self.spillere:

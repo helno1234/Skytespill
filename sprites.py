@@ -143,7 +143,6 @@ class Kule:
             self.rektangel = self.oppdater_rektangel()
     
     def kollisjon(self, objekt):
-        print(self.rektangel, self.senter)
         return self.rektangel.colliderect(objekt.rect)
 
     
