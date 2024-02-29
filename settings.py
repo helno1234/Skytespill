@@ -25,3 +25,9 @@ SPILLER_BREDDE = 50
 SPILLER_HØYDE = 70
 SPILLER_AKS = 0.4
 SPILLER_FRIKSJON = -0.10
+
+# Innstillinger til kule
+KULE_RADIUS = 10
+
+# Spillrunder (sek)
+SPILLRUNDER_TID = 10

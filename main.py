@@ -6,12 +6,18 @@ from sprites import *
 # Lager en liste til platformene, og legger til bakken
 platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
 
+# Tom liste til å legge inn kule_objekter
 kule_liste = []
 
 class Spillbrett:
     def __init__(self):
         # Initiere pygame
         pg.init()
+        
+        """
+        # Spiller ikke spillet enda
+        self.spiller_spill = False
+        """
         
         # Lager en klokke
         self.klokke = pg.time.Clock()
@@ -21,17 +27,28 @@ class Spillbrett:
         
         # Variabel som styrer om spillet skal kjøres
         self.kjører = True
+    
+        self.poeng_1 = 0
+        self.poeng_2 = 0
         
-        #self.kule = Kule()
+        self.ammo_1 = 10
+        self.ammo_2 = 10
+   
+    def ny_runde_innstillinger(self):
+        self.poeng_1 = 0
+        self.poeng_2 = 0
+        
+        self.ammo_1 = 10
+        self.ammo_2 = 10
 
     def ny(self):
         # Lager spiller-objekt
-        self.spiller_1 = SpillerPiler()
-        self.spiller_2 = SpillerTaster()
+        self.spiller_2 = SpillerH()
+        self.spiller_1 = SpillerV()
         self.spillere = [self.spiller_1, self.spiller_2]
         
-        platform_liste.append(Platform(0, 475, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
-        platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 475, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
+        platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
+        platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         
         # Lager plattformer
         while len(platform_liste) < 5:
@@ -63,6 +80,14 @@ class Spillbrett:
         self.kjør()
     
     def kjør(self):
+        """
+        for hendelse in pg.event.get():
+            if hendelse.type == pg.KEYDOWN:
+                if hendelse.key == pg.K_RETURN:
+                    self.spiller_spill = True
+        """
+        self.ny_runde_innstillinger()
+        
         self.spiller_spill = True
         
         while self.spiller_spill:
@@ -71,9 +96,17 @@ class Spillbrett:
             self.oppdater()
             self.tegne()
             
+        """    
+            nå_tid = time.time()
+            
+            if nå_tid - start_tid >= SPILLRUNDER_TID:
+                self.spiller_spill = False
+            
+        self.overflate.fill(GRØNN)
+        print("SPILL")
+        """   
     def hendelser(self):
-        
-        # Går gjennom henselser (events)
+        # Går gjennom hendelser (events)
         for hendelse in pg.event.get():
             # Sjekker om vi ønsker å lukke vinduet
             if hendelse.type == pg.QUIT:
@@ -83,49 +116,77 @@ class Spillbrett:
                 
             if hendelse.type == pg.KEYDOWN:
                 # Spilleren skal hoppe hvis vi trykker på mellomromstasten
-                if hendelse.key == pg.K_UP:
+                if hendelse.key == pg.K_w:
                     if self.spiller_1.fart[1] == 0:
                         self.spiller_1.hopp()
                 
-                if (hendelse.key == pg.K_t):
-                    self.opprett_kule()
+                if hendelse.key == pg.K_e:
+                    if self.ammo_1 > 0:
+                        self.opprett_kule(self.spiller_1)
+                        self.ammo_1 -= 1
+                    
+                if hendelse.key == pg.K_q:
+                    if self.ammo_1 > 0:
+                        self.opprett_kule(self.spiller_1, høyre = False)
+                        self.ammo_1 -= 1
+                
+                if hendelse.key == pg.K_o:
+                    if self.ammo_2 > 0:
+                        self.opprett_kule(self.spiller_2)
+                        self.ammo_2 -= 1
+                    print(f"Ammo 1 = {self.ammo_1}")
+                    print(f"Ammo 2 = {self.ammo_2}")
                         
+                
+                if hendelse.key == pg.K_u:
+                    if self.ammo_2 > 0:
+                        self.opprett_kule(self.spiller_2, høyre = False)
+                        self.ammo_2 -= 1
 
-                if hendelse.key == pg.K_w:
+                if hendelse.key == pg.K_i:
                     if self.spiller_2.fart[1] == 0:
                         self.spiller_2.hopp()
                         
-    def opprett_kule(self):
-        ny_kule = Kule()
+                if hendelse.key == pg.K_RETURN:
+                    self.spiller_spill = False
+                    print("SP")
+                        
+    def opprett_kule(self, spiller, høyre = True):
+        ny_kule = Kule(spiller.rect.x + SPILLER_BREDDE, spiller.rect.y + SPILLER_HØYDE//2)
         ny_kule.skutt = True
+        if høyre:
+            ny_kule.venstre = False
         kule_liste.append(ny_kule)
         self.kule = kule_liste[-1]
         
     def oppdater(self):
         self.spiller_1.oppdater()
         self.spiller_2.oppdater()
+        
         for kule in kule_liste:
             kule.oppdater()
             if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
                 kule_liste.remove(kule)
-                print(kule.kollisjon(self.spiller_1))
-            elif kule.kollisjon(self.spiller_1) or kule.kollisjon(self.spiller_2):
-                kule_liste.remove(kule)
-                print("skutt")
-
+                
+            for spiller in self.spillere:
+                # print(kule.rektangel)
+                if kule.kollisjon(spiller):
+                    kule_liste.remove(kule)
+                    spiller.poeng += 1
+                    print(f"Spiller 1: {self.spiller_1.poeng}. Spiller 2: {self.spiller_2.poeng}")
         
         # Sjekker om spillerne faller
         for spiller in self.spillere:
             if spiller.fart[1] > 0:
-                kollisjon = False
+                kollisjon_spiller_platform = False
             
                 # Sjekker om spilleren kolliderer med en plattform
                 for p in platform_liste:
                     if pg.Rect.colliderect(spiller.rect, p.rect):
-                        kollisjon = True
+                        kollisjon_spiller_platform = True
                         break
                 
-                if kollisjon:
+                if kollisjon_spiller_platform:
                     spiller.pos[1] = p.rect.y - SPILLER_HØYDE
                     spiller.fart[1] = 0
     

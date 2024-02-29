@@ -16,8 +16,6 @@ class Spiller:
         self.aks = [0, 0]
         
         self.poeng = 0
-        
-        #print(self.rect)
     
     # Metode for hopping
     def hopp(self):
@@ -43,8 +41,6 @@ class Spiller:
         if self.pos[1] < 0:
             self.pos[1] = 0
             self.fart[1] = 0
-            
-        # print(self.pos[1])
         
         # Sjekker om spilleren er ved siden av platformene på siden av spillebrettet
         if self.pos[0] < PLATFORM_BREDDE and self.pos[1] > 475:
@@ -64,7 +60,7 @@ class Spiller:
         
 
 # Klasse for spillobjekt som bruker piltaster
-class SpillerPiler(Spiller):
+class SpillerH(Spiller):
     def __init__(self):
         super().__init__()
         self.rect.center = (
@@ -79,14 +75,14 @@ class SpillerPiler(Spiller):
         # Henter tastene fra tastaturet
         keys = pg.key.get_pressed()
         
-        if keys[pg.K_LEFT]:
+        if keys[pg.K_j]:
             self.aks[0] = -SPILLER_AKS
             
-        if keys[pg.K_RIGHT]:
+        if keys[pg.K_l]:
             self.aks[0] = SPILLER_AKS
             
 # Klasse for spillobjekt som bruker piltaster
-class SpillerTaster(Spiller):    
+class SpillerV(Spiller):    
     def oppdater(self):
         super().oppdater()
         self.aks = [0, GRAV]
@@ -117,33 +113,29 @@ class Kule:
         self.y = y
         
         self.senter = (self.x, self.y)
-        self.radius = 10
+        self.radius = KULE_RADIUS
         
         self.bredde = self.radius
         self.høyde = self.radius
         
         self.skutt = False
         
-        self.fart = [0,0]
-        
         self.rektangel = self.oppdater_rektangel()
+        self.venstre = True
 
     def oppdater_rektangel(self):
          return pg.Rect(self.x, self.y, self.bredde, self.høyde)
 
     def oppdater(self):
         if self.skutt:
+            self.fart = [10,0]
             self.rektangel = pg.Rect(self.senter[0], self.senter[1], self.radius, self.radius)
-            self.fart = [5, 0]
-            tid = 1  # Endre tidssteg etter behov
-            self.senter = (self.senter[0] + self.fart[0] * tid, self.senter[1])
-            
-            # Sjekk om kulen er utenfor skjermen
-            if self.senter[0] < 0 or self.senter[0] > BREDDE:
-                self.radius = 0	# Kulern blir borte
-                self.skutt = False
-              
-            self.x += self.fart[0]
+            if self.venstre == True:
+                self.senter = (self.senter[0] - self.fart[0], self.senter[1])
+            else:
+                self.senter = (self.senter[0] + self.fart[0], self.senter[1])
+                self.x += self.fart[0]
+                
             self.rektangel = self.oppdater_rektangel()
     
     def kollisjon(self, objekt):
