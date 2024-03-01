@@ -27,17 +27,15 @@ class Spillbrett:
         # Poeng til spiller_1 og spiller_2
         self.poeng_1 = 0
         self.poeng_2 = 0
-   
-    def ny_runde_innstillinger(self):
-        # Hvor mange kuler de kan skyte per runde
+        
         self.ammo_1 = 10
         self.ammo_2 = 10
 
     def ny(self):
-        self.ny_runde_innstillinger()
         # Lager spiller-objekt
         self.spiller_2 = SpillerH()
         self.spiller_1 = SpillerV()
+        
         self.spillere = [self.spiller_1, self.spiller_2]
         
         platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
@@ -73,20 +71,16 @@ class Spillbrett:
         self.kjør()
     
     def kjør(self):
-        
         ny_tid = time.time()
-        #self.spiller_spill = True
         if self.spiller_spill:
             while ny_tid - self.start_tid >= SPILLRUNDER_TID:
-                self.overflate.fill((0, 0, 0))
-                pg.display.flip()
-
+                self.tegne_pause("Spiller 1", "Spiller 2", self.poeng_1, self.poeng_2, self.ammo_1, self.ammo_2)
+                
                 for hendelse in pg.event.get():
                     if hendelse.type == pg.KEYDOWN and hendelse.key == pg.K_RETURN:
                         self.start_tid = time.time()
-                            # venter_på_enter = False
-                
-                        self.ny_runde_innstillinger()
+                 
+                        self.ny()
             
             while ny_tid - self.start_tid < SPILLRUNDER_TID:
                 self.klokke.tick(FPS)
@@ -114,6 +108,7 @@ class Spillbrett:
                 
                 if hendelse.key == pg.K_e:
                     if self.ammo_1 > 0:
+                        # print(f"Ammo 1 = {self.ammo_1}")
                         self.opprett_kule(self.spiller_1)
                         self.ammo_1 -= 1
                     
@@ -126,7 +121,6 @@ class Spillbrett:
                     if self.ammo_2 > 0:
                         self.opprett_kule(self.spiller_2)
                         self.ammo_2 -= 1
-                    print(f"Ammo 1 = {self.ammo_1}")
                     print(f"Ammo 2 = {self.ammo_2}")
                         
                 
@@ -188,7 +182,8 @@ class Spillbrett:
                 if kollisjon_spiller_platform:
                     spiller.pos[1] = p.rect.y - SPILLER_HØYDE
                     spiller.fart[1] = 0
-    
+
+        
     def tegne(self):
         # Henter sky-bildet og endrer størrelsen slik at den passer til skjerm, uavhengig av størrelse
         himmel_bilde = pg.transform.scale(pg.image.load("himmel_skytespill.jpeg"), (BREDDE, HØYDE))
@@ -214,6 +209,43 @@ class Spillbrett:
         
         # "Flipper" displayet for å vise hva vi har tegnet
         pg.display.flip()
+        
+    def tegne_pause(self, spiller_1, spiller_2, poeng_1, poeng_2, ammo_1, ammo_2):
+        self.overflate.fill((0, 0, 0))
+        
+        pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
+        
+        pg.draw.rect(self.overflate, GRØNN, [BREDDE//2 - 2, 20, 4, HØYDE-40])
+        
+        spillertekst = FONT1.render(f"{spiller_1}", True, ROSE_TEST)
+        self.overflate.blit(spillertekst, (self.sentrere_tekst(spillertekst, gyldig = True), 50))
+        
+        poengtekst = (FONT2.render(f"Antall poeng: {poeng_1}", True, ROSE_TEST))
+        self.overflate.blit(poengtekst, (self.sentrere_tekst(poengtekst, gyldig = True), 100))
+        #self.overflate.blit(FONT2.render(f"Ammo igjen: {ammo_1}", True, ROSE_TEST), (BREDDE//2 - 290, 150))
+    
+        ammotekst = FONT2.render(f"Ammo igjen: {ammo_1}", True, ROSE_TEST)
+        self.overflate.blit(ammotekst, (self.sentrere_tekst(ammotekst, gyldig = True), 150))
+    
+    
+        spiller2tekst = FONT1.render(f"{spiller_2}", True, ROSE_TEST)
+        self.overflate.blit(spiller2tekst, (self.sentrere_tekst(spiller2tekst), 50))
+        
+        poeng2tekst = FONT2.render(f"Antall poeng: {poeng_2}", True, ROSE_TEST)
+        self.overflate.blit(poeng2tekst, (self.sentrere_tekst(poeng2tekst), 100))
+        
+        ammo2tekst = FONT2.render(f"Ammo igjen: {ammo_2}", True, ROSE_TEST)
+        self.overflate.blit(ammo2tekst, (self.sentrere_tekst(ammo2tekst), 150))
+        
+        pg.display.flip()
+        
+    def sentrere_tekst(self, tekst, gyldig = False):
+        if gyldig:
+            tallet = 500
+        else:
+            tallet = 100
+        return BREDDE//2 - tallet + BREDDE/4 - (tekst.get_rect().width//2)
+
 
 spillbrett_objekt = Spillbrett()
 

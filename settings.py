@@ -1,3 +1,7 @@
+import pygame as pg
+
+pg.init()
+
 # Konstanter
 BREDDE = 1200
 HØYDE = 600
@@ -13,6 +17,7 @@ SVART = (0, 0, 0)
 HVIT = (255, 255, 255)
 GRÅ = (50, 50, 50)
 GRØNN = (0, 255, 0)
+ROSE_TEST = (255, 150, 150)
 
 # Platformer
 PLATFORM_HØYDE = 25
@@ -31,3 +36,7 @@ KULE_RADIUS = 10
 
 # Spillrunder (sek)
 SPILLRUNDER_TID = 5
+
+# Fonter til skrift
+FONT1 = pg.font.Font(None, 36)
+FONT2 = pg.font.Font(None, 24)
