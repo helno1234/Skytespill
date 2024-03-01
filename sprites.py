@@ -16,6 +16,9 @@ class Spiller:
         self.fart = [0, 0]
         self.aks = [0, 0]
         
+        # Tom liste for oppdateringer
+        self.oppdateringsliste = []
+        
         # Tom liste til å legge inn kule_objekter
         self.kule_liste = []
     
@@ -142,17 +145,17 @@ class Kule:
     
     def kollisjon(self, objekt):
         return self.rektangel.colliderect(objekt.rect)
-
     
+class Oppdaterings_boks:
+    def __init__(self):
+        self.x = BREDDE//2 - BREDDE//4
+        self.y = HØYDE//3
+        
+        self.b = 200
+        self.h = BOKS_HØYDE
+        
+        self.bilde = pg.Surface((100, 50))
+        self.bilde.fill(GRØNN)
+        
+        self.tekst = FONT2.render("TESTING", True, HVIT)
 
-            
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        

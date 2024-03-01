@@ -16,8 +16,8 @@ FPS = 60
 SVART = (0, 0, 0)
 HVIT = (255, 255, 255)
 GRÅ = (50, 50, 50)
+LYSE_GRÅ = (150, 150, 150)
 GRØNN = (0, 255, 0)
-ROSE_TEST = (255, 150, 150)
 
 # Platformer
 PLATFORM_HØYDE = 25
@@ -31,11 +31,15 @@ SPILLER_HØYDE = 90
 SPILLER_AKS = 0.4
 SPILLER_FRIKSJON = -0.10
 
+# Innstillinger til oppdateringsbokser
+BOKS_HØYDE = 50
+BOKS_AVSTAND = 10
+
 # Innstillinger til kule
 KULE_RADIUS = 10
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 5
+SPILLRUNDER_TID = 1
 
 # Fonter til skrift
 FONT1 = pg.font.Font(None, 36)

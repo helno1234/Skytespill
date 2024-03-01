@@ -30,6 +30,8 @@ class Spillbrett:
         
         self.ammo_1 = 10
         self.ammo_2 = 10
+        
+        self.oppdaterings_boks = Oppdaterings_boks()
 
     def ny(self):
         # Lager spiller-objekt
@@ -37,6 +39,8 @@ class Spillbrett:
         self.spiller_1 = SpillerV()
         
         self.spillere = [self.spiller_1, self.spiller_2]
+        
+        
         
         platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
@@ -215,29 +219,45 @@ class Spillbrett:
         
         pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
         
-        pg.draw.rect(self.overflate, GRØNN, [BREDDE//2 - 2, 20, 4, HØYDE-40])
+        # Stripe for å skille mellom spiller 1 og 2
+        pg.draw.rect(self.overflate, LYSE_GRÅ, [BREDDE//2, 20, 2, HØYDE-150])
         
-        spillertekst = FONT1.render(f"{spiller_1}", True, ROSE_TEST)
+        spillertekst = FONT1.render(f"{spiller_1}", True, HVIT)
         self.overflate.blit(spillertekst, (self.sentrere_tekst(spillertekst, gyldig = True), 50))
         
-        poengtekst = (FONT2.render(f"Antall poeng: {poeng_1}", True, ROSE_TEST))
+        poengtekst = (FONT2.render(f"Antall poeng: {poeng_1}", True, HVIT))
         self.overflate.blit(poengtekst, (self.sentrere_tekst(poengtekst, gyldig = True), 100))
         #self.overflate.blit(FONT2.render(f"Ammo igjen: {ammo_1}", True, ROSE_TEST), (BREDDE//2 - 290, 150))
     
-        ammotekst = FONT2.render(f"Ammo igjen: {ammo_1}", True, ROSE_TEST)
-        self.overflate.blit(ammotekst, (self.sentrere_tekst(ammotekst, gyldig = True), 150))
+        ammotekst = FONT2.render(f"Ammo igjen: {ammo_1}", True, HVIT)
+        self.overflate.blit(ammotekst, (self.sentrere_tekst(ammotekst, gyldig = True), 125))
     
     
-        spiller2tekst = FONT1.render(f"{spiller_2}", True, ROSE_TEST)
+        spiller2tekst = FONT1.render(f"{spiller_2}", True, HVIT)
         self.overflate.blit(spiller2tekst, (self.sentrere_tekst(spiller2tekst), 50))
         
-        poeng2tekst = FONT2.render(f"Antall poeng: {poeng_2}", True, ROSE_TEST)
+        poeng2tekst = FONT2.render(f"Antall poeng: {poeng_2}", True, HVIT)
         self.overflate.blit(poeng2tekst, (self.sentrere_tekst(poeng2tekst), 100))
         
-        ammo2tekst = FONT2.render(f"Ammo igjen: {ammo_2}", True, ROSE_TEST)
-        self.overflate.blit(ammo2tekst, (self.sentrere_tekst(ammo2tekst), 150))
+        ammo2tekst = FONT2.render(f"Ammo igjen: {ammo_2}", True, HVIT)
+        self.overflate.blit(ammo2tekst, (self.sentrere_tekst(ammo2tekst), 125))
+        
+        # Skrive litt informasjon:
+        info_tekst = FONT2.render("Trykk på 'Enter' for å starte spillet igjen.", True, HVIT)
+        self.overflate.blit(info_tekst, (BREDDE//2 - info_tekst.get_rect().width//2, 500))
+        
+        info_tekst_1 = FONT2.render("Spiller 1 kan bruke w og s, og spiller 2 kan bruke i og k til å velge oppdateringer.", True, HVIT)
+        info_tekst_2 = FONT2.render("Spiller 1 betaler ved å trykke ..., og spiller 2 bruker ... til å betale.", True, HVIT)
+        
+        self.overflate.blit(info_tekst_1, (BREDDE//2 - info_tekst_1.get_rect().width//2, 525))
+        self.overflate.blit(info_tekst_2, (BREDDE//2 - info_tekst_2.get_rect().width//2, 550))
+        
+        for i in range(4):
+            pg.draw.rect(self.overflate, LYSE_GRÅ, [self.oppdaterings_boks.x, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+            pg.draw.rect(self.overflate, LYSE_GRÅ, [self.oppdaterings_boks.x + 400, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
         
         pg.display.flip()
+    
         
     def sentrere_tekst(self, tekst, gyldig = False):
         if gyldig:
