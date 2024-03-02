@@ -19,8 +19,14 @@ class Spiller:
         # Tom liste for oppdateringer
         self.oppdateringsliste = []
         
+        # Tom liste for prisene
+        self.priser = [15, 10, 5]
+        
         # Tom liste til å legge inn kule_objekter
         self.kule_liste = []
+        
+        # Hvilken oppdatering som er "gyldig"
+        self.gyldig = 0
     
     # Metode for hopping
     def hopp(self):

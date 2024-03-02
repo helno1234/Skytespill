@@ -28,12 +28,12 @@ class Spillbrett:
         self.poeng_1 = 0
         self.poeng_2 = 0
         
-        self.ammo_1 = 10
-        self.ammo_2 = 10
-        
         self.oppdaterings_boks = Oppdaterings_boks()
 
     def ny(self):
+        self.ammo_1 = 10
+        self.ammo_2 = 10
+        
         # Lager spiller-objekt
         self.spiller_2 = SpillerH()
         self.spiller_1 = SpillerV()
@@ -246,18 +246,36 @@ class Spillbrett:
         info_tekst = FONT2.render("Trykk på 'Enter' for å starte spillet igjen.", True, HVIT)
         self.overflate.blit(info_tekst, (BREDDE//2 - info_tekst.get_rect().width//2, 500))
         
-        info_tekst_1 = FONT2.render("Spiller 1 kan bruke w og s, og spiller 2 kan bruke i og k til å velge oppdateringer.", True, HVIT)
+        info_tekst_1 = FONT2.render("Spiller 1 kan trykke s, og spiller 2 kan trykke k til å gå gjennom oppdateringene.", True, HVIT)
         info_tekst_2 = FONT2.render("Spiller 1 betaler ved å trykke ..., og spiller 2 bruker ... til å betale.", True, HVIT)
         
         self.overflate.blit(info_tekst_1, (BREDDE//2 - info_tekst_1.get_rect().width//2, 525))
         self.overflate.blit(info_tekst_2, (BREDDE//2 - info_tekst_2.get_rect().width//2, 550))
         
         for i in range(4):
-            pg.draw.rect(self.overflate, LYSE_GRÅ, [self.oppdaterings_boks.x, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
-            pg.draw.rect(self.overflate, LYSE_GRÅ, [self.oppdaterings_boks.x + 400, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+            self.spiller_1.oppdateringsliste.append([self.oppdaterings_boks.x, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+            self.spiller_2.oppdateringsliste.append([self.oppdaterings_boks.x + 400, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+            
         
+        self.skrolle_oppdateringer(self.spiller_1)
+        self.skrolle_oppdateringer(self.spiller_2)
         pg.display.flip()
     
+   
+    def skrolle_oppdateringer(self, spiller):
+        for oppdatering in spiller.oppdateringsliste:
+            for hendelse in pg.event.get():
+                # Sjekker om vi ønsker å lukke vinduet
+                if hendelse.type == pg.KEYDOWN:
+                    if hendelse.key == pg.K_s:
+                        self.spiller_1.gyldig += 1
+                    if hendelse.key == pg.K_k:
+                        self.spiller_2.gyldig += 1
+                    
+            if oppdatering == spiller.oppdateringsliste[spiller.gyldig]:
+                pg.draw.rect(self.overflate, GRØNN, oppdatering)
+            else:
+                pg.draw.rect(self.overflate, LYSE_GRÅ, oppdatering)
         
     def sentrere_tekst(self, tekst, gyldig = False):
         if gyldig:

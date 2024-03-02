@@ -39,7 +39,7 @@ BOKS_AVSTAND = 10
 KULE_RADIUS = 10
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 1
+SPILLRUNDER_TID = 5
 
 # Fonter til skrift
 FONT1 = pg.font.Font(None, 36)
