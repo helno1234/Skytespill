@@ -18,6 +18,7 @@ HVIT = (255, 255, 255)
 GRÅ = (50, 50, 50)
 LYSE_GRÅ = (150, 150, 150)
 GRØNN = (0, 255, 0)
+RØD = (255, 0, 0)
 
 # Platformer
 PLATFORM_HØYDE = 25

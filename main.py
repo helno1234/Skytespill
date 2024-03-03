@@ -29,19 +29,14 @@ class Spillbrett:
         self.poeng_2 = 0
         
         self.oppdaterings_boks = Oppdaterings_boks()
-
-    def ny(self):
-        self.ammo_1 = 10
-        self.ammo_2 = 10
         
         # Lager spiller-objekt
         self.spiller_2 = SpillerH()
         self.spiller_1 = SpillerV()
         
         self.spillere = [self.spiller_1, self.spiller_2]
-        
-        
-        
+
+    def ny(self):
         platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         
@@ -78,13 +73,22 @@ class Spillbrett:
         ny_tid = time.time()
         if self.spiller_spill:
             while ny_tid - self.start_tid >= SPILLRUNDER_TID:
-                self.tegne_pause("Spiller 1", "Spiller 2", self.poeng_1, self.poeng_2, self.ammo_1, self.ammo_2)
-                
                 for hendelse in pg.event.get():
                     if hendelse.type == pg.KEYDOWN and hendelse.key == pg.K_RETURN:
                         self.start_tid = time.time()
                  
-                        self.ny()
+                        #self.ny()
+                        
+                self.tegne_pause("Spiller 1", "Spiller 2", self.spiller_1.ammo, self.spiller_2.ammo)
+                
+                for i in range(4):
+                    self.spiller_1.oppdateringsliste.append([self.oppdaterings_boks.x, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+                    self.spiller_2.oppdateringsliste.append([self.oppdaterings_boks.x + 400, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+        
+                self.tegne_oppdateringer(self.spiller_1)
+                self.tegne_oppdateringer(self.spiller_2)
+                
+                pg.display.flip()
             
             while ny_tid - self.start_tid < SPILLRUNDER_TID:
                 self.klokke.tick(FPS)
@@ -111,27 +115,27 @@ class Spillbrett:
                         self.spiller_1.hopp()
                 
                 if hendelse.key == pg.K_e:
-                    if self.ammo_1 > 0:
-                        # print(f"Ammo 1 = {self.ammo_1}")
+                    if self.spiller_1.ammo > 0:
+                        # print(f"Ammo 1 = {self.spiller_1.ammo}")
                         self.opprett_kule(self.spiller_1)
-                        self.ammo_1 -= 1
+                        self.spiller_1.ammo -= 1
                     
                 if hendelse.key == pg.K_q:
-                    if self.ammo_1 > 0:
+                    if self.spiller_1.ammo > 0:
                         self.opprett_kule(self.spiller_1, høyre = False)
-                        self.ammo_1 -= 1
+                        self.spiller_1.ammo -= 1
                 
                 if hendelse.key == pg.K_o:
-                    if self.ammo_2 > 0:
+                    if self.spiller_2.ammo > 0:
                         self.opprett_kule(self.spiller_2)
-                        self.ammo_2 -= 1
-                    print(f"Ammo 2 = {self.ammo_2}")
+                        self.spiller_2.ammo -= 1
+                    print(f"Ammo 2 = {self.spiller_2.ammo}")
                         
                 
                 if hendelse.key == pg.K_u:
-                    if self.ammo_2 > 0:
+                    if self.spiller_2.ammo > 0:
                         self.opprett_kule(self.spiller_2, høyre = False)
-                        self.ammo_2 -= 1
+                        self.spiller_2.ammo -= 1
 
                 if hendelse.key == pg.K_i:
                     if self.spiller_2.fart[1] == 0:
@@ -214,7 +218,9 @@ class Spillbrett:
         # "Flipper" displayet for å vise hva vi har tegnet
         pg.display.flip()
         
-    def tegne_pause(self, spiller_1, spiller_2, poeng_1, poeng_2, ammo_1, ammo_2):
+        
+        
+    def tegne_pause(self, spiller_1, spiller_2, ammo_1, ammo_2):
         self.overflate.fill((0, 0, 0))
         
         pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
@@ -222,61 +228,73 @@ class Spillbrett:
         # Stripe for å skille mellom spiller 1 og 2
         pg.draw.rect(self.overflate, LYSE_GRÅ, [BREDDE//2, 20, 2, HØYDE-150])
         
-        spillertekst = FONT1.render(f"{spiller_1}", True, HVIT)
-        self.overflate.blit(spillertekst, (self.sentrere_tekst(spillertekst, gyldig = True), 50))
+        # Skriver informasjon oppe om de ulike spillerne
+        self.tegne_info_oppe(FONT1, f"{spiller_1}", 50, gyldig = True)
+        self.tegne_info_oppe(FONT1, f"{spiller_2}", 50)
+        self.tegne_info_oppe(FONT2, f"Antall poeng: {self.poeng_1}", 100, gyldig = True)
+        self.tegne_info_oppe(FONT2, f"Antall poeng: {self.poeng_2}", 100)
+        self.tegne_info_oppe(FONT2, f"Ammo igjen: {ammo_1}", 125, gyldig = True)
+        self.tegne_info_oppe(FONT2, f"Ammo igjen: {ammo_2}", 125)
         
-        poengtekst = (FONT2.render(f"Antall poeng: {poeng_1}", True, HVIT))
-        self.overflate.blit(poengtekst, (self.sentrere_tekst(poengtekst, gyldig = True), 100))
-        #self.overflate.blit(FONT2.render(f"Ammo igjen: {ammo_1}", True, ROSE_TEST), (BREDDE//2 - 290, 150))
-    
-        ammotekst = FONT2.render(f"Ammo igjen: {ammo_1}", True, HVIT)
-        self.overflate.blit(ammotekst, (self.sentrere_tekst(ammotekst, gyldig = True), 125))
-    
-    
-        spiller2tekst = FONT1.render(f"{spiller_2}", True, HVIT)
-        self.overflate.blit(spiller2tekst, (self.sentrere_tekst(spiller2tekst), 50))
+        # Skriver informasjonen nede om hvilke taster man kan trykke
+        self.tegne_info_nede("Trykk på 'Enter' for å starte spillet igjen.", 500)
+        self.tegne_info_nede("Spiller 1 kan trykke 's', og spiller 2 kan trykke 'k' til å gå gjennom oppdateringene.", 525)
+        self.tegne_info_nede("Spiller 1 betaler ved å trykke 'w', og spiller 2 bruker 'i' til å betale.", 550)
         
-        poeng2tekst = FONT2.render(f"Antall poeng: {poeng_2}", True, HVIT)
-        self.overflate.blit(poeng2tekst, (self.sentrere_tekst(poeng2tekst), 100))
-        
-        ammo2tekst = FONT2.render(f"Ammo igjen: {ammo_2}", True, HVIT)
-        self.overflate.blit(ammo2tekst, (self.sentrere_tekst(ammo2tekst), 125))
-        
-        # Skrive litt informasjon:
-        info_tekst = FONT2.render("Trykk på 'Enter' for å starte spillet igjen.", True, HVIT)
-        self.overflate.blit(info_tekst, (BREDDE//2 - info_tekst.get_rect().width//2, 500))
-        
-        info_tekst_1 = FONT2.render("Spiller 1 kan trykke s, og spiller 2 kan trykke k til å gå gjennom oppdateringene.", True, HVIT)
-        info_tekst_2 = FONT2.render("Spiller 1 betaler ved å trykke ..., og spiller 2 bruker ... til å betale.", True, HVIT)
-        
-        self.overflate.blit(info_tekst_1, (BREDDE//2 - info_tekst_1.get_rect().width//2, 525))
-        self.overflate.blit(info_tekst_2, (BREDDE//2 - info_tekst_2.get_rect().width//2, 550))
-        
-        for i in range(4):
-            self.spiller_1.oppdateringsliste.append([self.oppdaterings_boks.x, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
-            self.spiller_2.oppdateringsliste.append([self.oppdaterings_boks.x + 400, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+    def tegne_info_oppe(self, font, tekst, y_pos, gyldig = False):
+        teksten = font.render(tekst, True, HVIT)
+        if gyldig:
+            self.overflate.blit(teksten, (self.sentrere_tekst(teksten, gyldig = True), y_pos))
+        else:
+            self.overflate.blit(teksten, (self.sentrere_tekst(teksten), y_pos))
             
+    def tegne_info_nede(self, tekst, y_pos):
+        teksten = FONT2.render(tekst, True, HVIT)
+        self.overflate.blit(teksten, (BREDDE//2 - teksten.get_rect().width//2, y_pos))
         
-        self.skrolle_oppdateringer(self.spiller_1)
-        self.skrolle_oppdateringer(self.spiller_2)
-        pg.display.flip()
-    
-   
-    def skrolle_oppdateringer(self, spiller):
+    def tegne_oppdateringer(self, spiller):
         for oppdatering in spiller.oppdateringsliste:
-            for hendelse in pg.event.get():
-                # Sjekker om vi ønsker å lukke vinduet
-                if hendelse.type == pg.KEYDOWN:
-                    if hendelse.key == pg.K_s:
-                        self.spiller_1.gyldig += 1
-                    if hendelse.key == pg.K_k:
-                        self.spiller_2.gyldig += 1
-                    
-            if oppdatering == spiller.oppdateringsliste[spiller.gyldig]:
-                pg.draw.rect(self.overflate, GRØNN, oppdatering)
+            
+            # Sjekker at variabel er mindre enn lengden på listene
+            if spiller.gyldig < 4:         
+                if oppdatering == spiller.oppdateringsliste[spiller.gyldig]:
+                    pg.draw.rect(self.overflate, spiller.gyldig_farge, oppdatering)
+                else:
+                    pg.draw.rect(self.overflate, LYSE_GRÅ, oppdatering)
+                
             else:
-                pg.draw.rect(self.overflate, LYSE_GRÅ, oppdatering)
-        
+                spiller.gyldig = 0
+            
+            for i in range(4):
+                self.overflate.blit(FONT1.render(spiller.priser[i], True, HVIT),
+                    (self.oppdaterings_boks.x + self.oppdaterings_boks.b - 50, self.oppdaterings_boks.y + BOKS_HØYDE/2 - 10 + (BOKS_HØYDE + BOKS_AVSTAND)*i))
+                
+        for hendelse in pg.event.get():
+            # Sjekker om vi ønsker å lukke vinduet
+            if hendelse.type == pg.KEYDOWN:
+                if hendelse.key == pg.K_s:
+                    self.spiller_1.gyldig += 1
+                    self.spiller_1.gyldig_farge = GRØNN
+                if hendelse.key == pg.K_k:
+                    self.spiller_2.gyldig += 1
+                    self.spiller_2.gyldig_farge = GRØNN
+    
+    
+                if hendelse.key == pg.K_w:
+                    if self.poeng_1 < int(self.spiller_1.priser[self.spiller_1.gyldig]):
+                        self.spiller_1.gyldig_farge = RØD
+                    else:
+                        self.poeng_1 -= int(self.spiller_1.priser[self.spiller_1.gyldig])
+                        if self.spiller_1.gyldig == 0:
+                            self.spiller_1.ammo += 10
+                            self.spiller_1.ammo_pris = str(int(self.spiller_1.ammo_pris) + 5)
+                            
+
+        self.overflate.blit(FONT2.render(f"+ 10 ammo", True, HVIT),
+            (self.oppdaterings_boks.x + 20, self.oppdaterings_boks.y + BOKS_HØYDE/2 - 5))
+            
+            
+            
     def sentrere_tekst(self, tekst, gyldig = False):
         if gyldig:
             tallet = 500

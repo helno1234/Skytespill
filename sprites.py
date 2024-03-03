@@ -19,14 +19,25 @@ class Spiller:
         # Tom liste for oppdateringer
         self.oppdateringsliste = []
         
+        self.gyldig_pris_ammo = 0
+        
+        self.ammo_pris = "10"
+        
+        self.ammo = 10
+        
+        
         # Tom liste for prisene
-        self.priser = [15, 10, 5]
+        self.priser = [self.ammo_pris, "10", "5", "1"]
         
         # Tom liste til å legge inn kule_objekter
         self.kule_liste = []
         
         # Hvilken oppdatering som er "gyldig"
         self.gyldig = 0
+        
+        self.gyldig_farge = GRØNN
+        
+        # self.poeng = 0
     
     # Metode for hopping
     def hopp(self):
