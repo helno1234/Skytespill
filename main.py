@@ -37,6 +37,7 @@ class Spillbrett:
         self.spillere = [self.spiller_1, self.spiller_2]
 
     def ny(self):
+        print(self.spiller_1.ammo)
         platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         
@@ -70,15 +71,36 @@ class Spillbrett:
         self.kjør()
     
     def kjør(self):
+        """
+        ny_tid = time.time()
+        
+        while ny_tid - self.start_tid < SPILLRUNDER_TID:
+            self.klokke.tick(FPS)
+            self.hendelser()
+            self.oppdater()
+            self.tegne()
+                
+            ny_tid = time.time()
+                
+        while ny_tid - self.start_tid >= SPILLRUNDER_TID:
+            for hendelse in pg.event.get():
+                print("HENDELSER")
+                
+            self.tegne_pause("Spiller 1", "Spiller 2", self.spiller_1.ammo, self.spiller_2.ammo)
+                
+            for i in range(4):
+                self.spiller_1.oppdateringsliste.append([self.oppdaterings_boks.x, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+                self.spiller_2.oppdateringsliste.append([self.oppdaterings_boks.x + 400, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
+        
+            self.tegne_oppdateringer(self.spiller_1)
+            self.tegne_oppdateringer(self.spiller_2)
+                
+            pg.display.flip()
+        """
         ny_tid = time.time()
         if self.spiller_spill:
             while ny_tid - self.start_tid >= SPILLRUNDER_TID:
-                for hendelse in pg.event.get():
-                    if hendelse.type == pg.KEYDOWN and hendelse.key == pg.K_RETURN:
-                        self.start_tid = time.time()
-                 
-                        #self.ny()
-                        
+
                 self.tegne_pause("Spiller 1", "Spiller 2", self.spiller_1.ammo, self.spiller_2.ammo)
                 
                 for i in range(4):
@@ -97,7 +119,6 @@ class Spillbrett:
                 self.tegne()
                 
                 ny_tid = time.time()
-        
     def hendelser(self):
         # Går gjennom hendelser (events)
         for hendelse in pg.event.get():
@@ -278,6 +299,14 @@ class Spillbrett:
                 if hendelse.key == pg.K_k:
                     self.spiller_2.gyldig += 1
                     self.spiller_2.gyldig_farge = GRØNN
+                    
+                if hendelse.key == pg.K_RETURN:
+                    print("PLIS")
+                    self.start_tid = time.time()
+                    self.ny()
+                    
+                if hendelse.type == pg.QUIT:
+                    self.kjører = False # Spillet skal avsluttes
     
     
                 if hendelse.key == pg.K_w:

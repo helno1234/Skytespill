@@ -21,7 +21,7 @@ class Spiller:
         
         self.gyldig_pris_ammo = 0
         
-        self.ammo_pris = "10"
+        self.ammo_pris = "5"
         
         self.ammo = 10
         
