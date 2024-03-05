@@ -37,7 +37,7 @@ BOKS_HØYDE = 50
 BOKS_AVSTAND = 10
 
 # Innstillinger til kule
-KULE_RADIUS = 10
+# KULE_RADIUS = 10
 
 # Spillrunder (sek)
 SPILLRUNDER_TID = 1

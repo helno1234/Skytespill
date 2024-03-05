@@ -25,8 +25,8 @@ class Spillbrett:
         self.spiller_spill = True
         
         # Poeng til spiller_1 og spiller_2
-        self.poeng_1 = 0
-        self.poeng_2 = 0
+        self.poeng_1 = 40
+        self.poeng_2 = 40
         
         self.oppdaterings_boks = Oppdaterings_boks()
         
@@ -38,7 +38,7 @@ class Spillbrett:
 
 
     def ny(self):
-        print(self.spiller_1.ammo)
+        #print(self.spiller_1.ammo)
         platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         
@@ -83,7 +83,7 @@ class Spillbrett:
                     self.spiller_1.oppdateringsliste.append([self.oppdaterings_boks.x, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
                     self.spiller_2.oppdateringsliste.append([self.oppdaterings_boks.x + 400, self.oppdaterings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppdaterings_boks.b, self.oppdaterings_boks.h])
         
-                self.tegne_oppdateringer(self.spiller_1)
+                self.tegne_oppdateringer(self.spiller_1, spiller_1 = True)
                 self.tegne_oppdateringer(self.spiller_2)
                 
                 pg.display.flip()
@@ -153,6 +153,7 @@ class Spillbrett:
     def oppdater(self):
         self.spiller_1.oppdater()
         self.spiller_2.oppdater()
+        #print(self.spiller_2.rect.x, self.spiller_2.rect.y)
         
         for kule in self.spiller_1.kule_liste:
             kule.oppdater()
@@ -160,6 +161,7 @@ class Spillbrett:
                 self.spiller_1.kule_liste.remove(kule)
                 
             if kule.kollisjon(self.spiller_2):
+                #print("Treffer spiller 2")
                 self.spiller_1.kule_liste.remove(kule)
                 self.poeng_1 += 1
                 print(f"Spiller 1: {self.poeng_1}. Spiller 2: {self.poeng_2}")
@@ -169,10 +171,11 @@ class Spillbrett:
             if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
                 self.spiller_2.kule_liste.remove(kule)
                 
-            print(self.spiller_1.rect)
-            print(kule.senter)
+            #print(self.spiller_1.rect)
+            #print(kule.senter)
 
             if kule.kollisjon(self.spiller_1):
+                print("Treffer spiller 1")
                 self.spiller_2.kule_liste.remove(kule)
                 self.poeng_2 += 1
                 print(f"Spiller 1: {self.poeng_1}. Spiller 2: {self.poeng_2}")
@@ -193,7 +196,7 @@ class Spillbrett:
                     spiller.fart[1] = 0
 
         
-    def tegne(self):
+    def tegne(self):        
         # Henter sky-bildet og endrer størrelsen slik at den passer til skjerm, uavhengig av størrelse
         himmel_bilde = pg.transform.scale(pg.image.load("himmel_skytespill.jpeg"), (BREDDE, HØYDE))
         
@@ -215,6 +218,9 @@ class Spillbrett:
         for kule in self.spiller_2.kule_liste:
         # Tegner kule
             pg.draw.circle(self.overflate, SVART, kule.senter, kule.radius)
+            
+        # Tegner rektangelet rundt spiller 1
+        # pg.draw.rect(self.overflate, RØD, (SPILLER_BREDDE, SPILLER_HØYDE, self.spiller_1.pos[0], self.spiller_1.pos[1]), 2)
         
         # "Flipper" displayet for å vise hva vi har tegnet
         pg.display.flip()
@@ -222,7 +228,7 @@ class Spillbrett:
         
         
     def tegne_pause(self, spiller_1, spiller_2, ammo_1, ammo_2):
-        self.overflate.fill((0, 0, 0))
+        self.overflate.fill(SVART)
         
         pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
         
@@ -245,6 +251,7 @@ class Spillbrett:
         
     def tegne_info_oppe(self, font, tekst, y_pos, gyldig = False):
         teksten = font.render(tekst, True, HVIT)
+        
         if gyldig:
             self.overflate.blit(teksten, (self.sentrere_tekst(teksten, gyldig = True), y_pos))
         else:
@@ -256,23 +263,29 @@ class Spillbrett:
         self.overflate.blit(teksten, (BREDDE//2 - teksten.get_rect().width//2, y_pos))
         
         
-    def tegne_oppdateringer(self, spiller):
+    def tegne_oppdateringer(self, spiller, spiller_1 = False):
         for oppdatering in spiller.oppdateringsliste:
             
             # Sjekker at variabel er mindre enn lengden på listene
             if spiller.gyldig < 4:         
                 if oppdatering == spiller.oppdateringsliste[spiller.gyldig]:
-                    pg.draw.rect(self.overflate, spiller.gyldig_farge, oppdatering)
+                    pg.draw.rect(self.overflate, spiller.gyldig_farge, oppdatering, 0, 4)
                 else:
-                    pg.draw.rect(self.overflate, LYSE_GRÅ, oppdatering)
+                    pg.draw.rect(self.overflate, LYSE_GRÅ, oppdatering, 0, 4)
                 
             else:
                 spiller.gyldig = 0
             
-            for i in range(4):
-                self.overflate.blit(FONT1.render(spiller.priser[i], True, HVIT),
-                    (self.oppdaterings_boks.x + self.oppdaterings_boks.b - 50, self.oppdaterings_boks.y + BOKS_HØYDE/2 - 10 + (BOKS_HØYDE + BOKS_AVSTAND)*i))
+            
+            if spiller_1:
+                ganging = 0
+            else:
+                ganging = 1
                 
+            for i in range(4):
+                    self.overflate.blit(FONT1.render(spiller.priser[i], True, HVIT),
+                      (self.oppdaterings_boks.x + self.oppdaterings_boks.b - 50 + (400*ganging), self.oppdaterings_boks.y + BOKS_HØYDE/2 - 10 + (BOKS_HØYDE + BOKS_AVSTAND)*i))
+            
         for hendelse in pg.event.get():
             # Sjekker om vi ønsker å lukke vinduet
             if hendelse.type == pg.KEYDOWN:
@@ -299,6 +312,8 @@ class Spillbrett:
                         # self.spiller_2.kule_liste = []    
                         
                     self.spiller_1.gyldig_farge = GRØNN
+                    self.spiller_2.gyldig_farge = GRØNN
+                    
                     self.start_tid = time.time()
                     
                 if hendelse.type == pg.QUIT:
@@ -310,20 +325,45 @@ class Spillbrett:
                         self.spiller_1.gyldig_farge = RØD
                     else:
                         self.poeng_1 -= int(self.spiller_1.priser[self.spiller_1.gyldig])
+                        
                         if self.spiller_1.gyldig == 0:
                             self.spiller_1.ammo += 10
                             self.spiller_1.ammo_pris = str(int(self.spiller_1.ammo_pris) + 5)
                             
-        self.oppdateringstekst(f"+ 10 ammo", 0)
-        self.oppdateringstekst(f"Større kule", 1)
-        self.oppdateringstekst(f"TESTING", 2)
-        self.oppdateringstekst(f"STJELE ???", 3)
+                        """ 
+                        if self.spiller_1.gyldig == 1:
+                            self.spiller_1.ammo += 10
+                            self.spiller_1.ammo_pris = str(int(self.spiller_1.ammo_pris) + 5)
+                        """
+                            
+                if hendelse.key == pg.K_i:
+                    if self.poeng_2 < int(self.spiller_2.priser[self.spiller_2.gyldig]):
+                        self.spiller_2.gyldig_farge = RØD
+                    else:
+                        self.poeng_2 -= int(self.spiller_2.priser[self.spiller_2.gyldig])
+                        if self.spiller_2.gyldig == 0:
+                            self.spiller_2.ammo += 10
+                            self.spiller_2.ammo_pris = str(int(self.spiller_2.ammo_pris) + 5)
         
-            
-    def oppdateringstekst(self, tekst, i):
+        # Liste med oppdateringstekster
+        oppdateringstekster = ["+ 10 ammo", "Større kule", "TESTING", "STJELE ???"]
+        
+        # Tegner oppdateringstekstene
+        for i in range(4):
+            self.oppdateringstekst(oppdateringstekster[i], i)
+            self.oppdateringstekst(oppdateringstekster[i], i, spiller_1 = False)
+
+        
+    def oppdateringstekst(self, tekst, i, spiller_1 = True):
+        if spiller_1:
+            gange = 0
+        else:
+            gange = 1
+        
         self.overflate.blit(FONT2.render(tekst, True, HVIT),
-            (self.oppdaterings_boks.x + 20, self.oppdaterings_boks.y + BOKS_HØYDE/2 + (BOKS_HØYDE + BOKS_AVSTAND)*i - 5))
+            (self.oppdaterings_boks.x + 20 + (400*gange), self.oppdaterings_boks.y + BOKS_HØYDE/2 + (BOKS_HØYDE + BOKS_AVSTAND)*i - 5))
             
+                
             
     def sentrere_tekst(self, tekst, gyldig = False):
         if gyldig:

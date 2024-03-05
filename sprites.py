@@ -36,8 +36,6 @@ class Spiller:
         self.gyldig = 0
         
         self.gyldig_farge = GRØNN
-        
-        # self.poeng = 0
     
     # Metode for hopping
     def hopp(self):
@@ -94,6 +92,7 @@ class SpillerH(Spiller):
     def oppdater(self):
         super().oppdater()
         self.aks = [0, GRAV]
+        
         # Henter tastene fra tastaturet
         keys = pg.key.get_pressed()
         
@@ -104,10 +103,14 @@ class SpillerH(Spiller):
             self.aks[0] = SPILLER_AKS
             
 # Klasse for spillobjekt som bruker piltaster
-class SpillerV(Spiller):    
+class SpillerV(Spiller):
+    def __init__(self):
+        super().__init__()
+        
     def oppdater(self):
         super().oppdater()
         self.aks = [0, GRAV]
+        
         # Henter tastene fra tastaturet
         keys = pg.key.get_pressed()
         
@@ -135,7 +138,7 @@ class Kule:
         self.y = y
         
         self.senter = (self.x, self.y)
-        self.radius = KULE_RADIUS
+        self.radius = 10
         
         self.bredde = self.radius
         self.høyde = self.radius
