@@ -27,8 +27,8 @@ PLATFORM_BREDDE = 200
 GRAV = 0.8
 
 # Innstillinger til spilleren
-SPILLER_BREDDE = 60
-SPILLER_HØYDE = 90
+SPILLER_BREDDE = 75
+SPILLER_HØYDE = 110
 SPILLER_AKS = 0.4
 SPILLER_FRIKSJON = -0.10
 
@@ -40,7 +40,7 @@ BOKS_AVSTAND = 10
 # KULE_RADIUS = 10
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 1
+SPILLRUNDER_TID = 2
 
 # Fonter til skrift
 FONT1 = pg.font.Font(None, 36)

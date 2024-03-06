@@ -116,24 +116,24 @@ class Spillbrett:
                 if hendelse.key == pg.K_e:
                     if self.spiller_1.ammo > 0:
                         # print(f"Ammo 1 = {self.spiller_1.ammo}")
-                        self.opprett_kule(self.spiller_1)
+                        self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius)
                         self.spiller_1.ammo -= 1
                     
                 if hendelse.key == pg.K_q:
                     if self.spiller_1.ammo > 0:
-                        self.opprett_kule(self.spiller_1, høyre = False)
+                        self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius, høyre = False)
                         self.spiller_1.ammo -= 1
                 
                 if hendelse.key == pg.K_o:
                     if self.spiller_2.ammo > 0:
-                        self.opprett_kule(self.spiller_2)
+                        self.opprett_kule(self.spiller_2, self.spiller_2.kule_radius)
                         self.spiller_2.ammo -= 1
                     print(f"Ammo 2 = {self.spiller_2.ammo}")
                         
                 
                 if hendelse.key == pg.K_u:
                     if self.spiller_2.ammo > 0:
-                        self.opprett_kule(self.spiller_2, høyre = False)
+                        self.opprett_kule(self.spiller_2, self.spiller_2.kule_radius, høyre = False)
                         self.spiller_2.ammo -= 1
 
                 if hendelse.key == pg.K_i:
@@ -141,8 +141,8 @@ class Spillbrett:
                         self.spiller_2.hopp()
              
              
-    def opprett_kule(self, spiller, høyre = True):
-        ny_kule = Kule(spiller.rect.x + SPILLER_BREDDE, spiller.rect.y + SPILLER_HØYDE//2)
+    def opprett_kule(self, spiller, radius, høyre = True):
+        ny_kule = Kule(spiller.rect.x + SPILLER_BREDDE, spiller.rect.y + SPILLER_HØYDE//2, radius)
         ny_kule.skutt = True
         if høyre:
             ny_kule.venstre = False
@@ -264,6 +264,7 @@ class Spillbrett:
         
         
     def tegne_oppdateringer(self, spiller, spiller_1 = False):
+        
         for oppdatering in spiller.oppdateringsliste:
             
             # Sjekker at variabel er mindre enn lengden på listene
@@ -307,6 +308,11 @@ class Spillbrett:
                     )
                     for spiller in self.spillere:
                         spiller.pos = list(spiller.rect.center)
+                        
+                        # Dersom spilleren har mindre enn 10 i ammo, skal spilleren få starte med 10 i ammo
+                        if spiller.ammo < 10:
+                            spiller.ammo = 10
+                            
                         # self.spiller_2.pos = list(self.spiller_2.rect.center)
                         spiller.kule_liste = []
                         # self.spiller_2.kule_liste = []    
@@ -321,29 +327,53 @@ class Spillbrett:
     
     
                 if hendelse.key == pg.K_w:
+                    self.kjøpe_oppdateringer(self.spiller_1, self.poeng_1)
+                    """
                     if self.poeng_1 < int(self.spiller_1.priser[self.spiller_1.gyldig]):
                         self.spiller_1.gyldig_farge = RØD
                     else:
-                        self.poeng_1 -= int(self.spiller_1.priser[self.spiller_1.gyldig])
-                        
                         if self.spiller_1.gyldig == 0:
                             self.spiller_1.ammo += 10
                             self.spiller_1.ammo_pris = str(int(self.spiller_1.ammo_pris) + 5)
                             
-                        """ 
                         if self.spiller_1.gyldig == 1:
-                            self.spiller_1.ammo += 10
-                            self.spiller_1.ammo_pris = str(int(self.spiller_1.ammo_pris) + 5)
+                            self.spiller_1.kule_radius += 1
+                            self.spiller_1.kule_pris = str(int(self.spiller_1.kule_pris) + 5)
+                           
+                        if self.spiller_1.gyldig == 3:
+                            for s in self.spillere:
+                                if s != self.spiller_1:
+                                    if spiller_poeng_ordbok[self.spiller_1] == self.poeng_1:
+                                        if self.poeng_2 > 1:
+                                            self.poeng_2 = self.poeng_2//2
+                                        else:
+                                            self.spiller_1.gyldig_farge = RØD
+                                    else:
+                                        if self.poeng_1 > 1:
+                                            self.poeng_1 = self.poeng_1//2
+                                        else:
+                                            self.spiller_2.gydlig_farge = RØD
+                                        
+                                        
+                        self.poeng_1 -= int(self.spiller_1.priser[self.spiller_1.gyldig])
                         """
-                            
+                    
                 if hendelse.key == pg.K_i:
+                    self.kjøpe_oppdateringer(self.spiller_2, self.poeng_2)
+                    """
                     if self.poeng_2 < int(self.spiller_2.priser[self.spiller_2.gyldig]):
                         self.spiller_2.gyldig_farge = RØD
                     else:
-                        self.poeng_2 -= int(self.spiller_2.priser[self.spiller_2.gyldig])
                         if self.spiller_2.gyldig == 0:
                             self.spiller_2.ammo += 10
                             self.spiller_2.ammo_pris = str(int(self.spiller_2.ammo_pris) + 5)
+                        
+                        if self.spiller_2.gyldig == 1:
+                            self.spiller_2.kule_radius += 1
+                            self.spiller_2.kule_pris = str(int(self.spiller_2.kule_pris) + 5)
+                            
+                        self.poeng_2 -= int(self.spiller_2.priser[self.spiller_2.gyldig])
+                    """
         
         # Liste med oppdateringstekster
         oppdateringstekster = ["+ 10 ammo", "Større kule", "TESTING", "STJELE ???"]
@@ -353,7 +383,48 @@ class Spillbrett:
             self.oppdateringstekst(oppdateringstekster[i], i)
             self.oppdateringstekst(oppdateringstekster[i], i, spiller_1 = False)
 
+    def kjøpe_oppdateringer(self, spiller, poeng):
+        # Ordbok med spiller og poeng:
+        spiller_poeng_ordbok = {
+            self.spiller_1: self.poeng_1,
+            self.spiller_2: self.poeng_2
+            }
         
+        if poeng < int(spiller.priser[spiller.gyldig]):
+            spiller.gyldig_farge = RØD
+        else:
+            gyldig_betaling = True
+                
+            if spiller.gyldig == 0:
+                spiller.ammo += 10
+                spiller.ammo_pris = str(int(spiller.ammo_pris) + 5)
+                            
+            if spiller.gyldig == 1:
+                spiller.kule_radius += 1
+                spiller.kule_pris = str(int(spiller.kule_pris) + 5)
+               
+            if spiller.gyldig == 3:
+                if spiller_poeng_ordbok[spiller] == self.poeng_1:
+                    if self.poeng_2 > 1:
+                        self.poeng_2 = self.poeng_2//2
+                    else:
+                        gyldig_betaling = False
+                else:
+                    if self.poeng_1 > 1:
+                        self.poeng_1 = self.poeng_1//2
+                    else:
+                        gyldig_betaling = False
+                        
+                        
+            if gyldig_betaling:
+                if spiller_poeng_ordbok[spiller] == self.poeng_1:
+                    print(self.poeng_1)
+                    self.poeng_1 -= int(self.spiller_1.priser[self.spiller_1.gyldig])
+                else:
+                    self.poeng_2 -= int(self.spiller_2.priser[self.spiller_2.gyldig])
+            else:
+                spiller.gyldig_farge = RØD
+    
     def oppdateringstekst(self, tekst, i, spiller_1 = True):
         if spiller_1:
             gange = 0

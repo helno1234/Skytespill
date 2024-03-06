@@ -22,12 +22,15 @@ class Spiller:
         self.gyldig_pris_ammo = 0
         
         self.ammo_pris = "5"
+        self.kule_pris = "15"
         
-        self.ammo = 10
+        self.ammo = 20
+        
+        self.kule_radius = 7
         
         
         # Tom liste for prisene
-        self.priser = [self.ammo_pris, "10", "5", "1"]
+        self.priser = [self.ammo_pris, self.kule_pris, "5", "1"]
         
         # Tom liste til å legge inn kule_objekter
         self.kule_liste = []
@@ -133,12 +136,12 @@ class Platform:
         self.rect.y = y
         
 class Kule:
-    def __init__(self, x, y):
+    def __init__(self, x, y, r):
         self.x = x
         self.y = y
         
         self.senter = (self.x, self.y)
-        self.radius = 10
+        self.radius = r
         
         self.bredde = self.radius
         self.høyde = self.radius
