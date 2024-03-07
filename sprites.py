@@ -105,6 +105,7 @@ class SpillerH(Spiller):
         if keys[pg.K_l]:
             self.aks[0] = SPILLER_AKS
             
+            
 # Klasse for spillobjekt som bruker piltaster
 class SpillerV(Spiller):
     def __init__(self):
@@ -126,6 +127,7 @@ class SpillerV(Spiller):
 
 class Platform:
     def __init__(self, x, y, b, h):
+        # self.bilde = pg.transform.scale(pg.image.load("murstein.jpeg"), (b,h))
         self.bilde = pg.Surface((b, h))
         self.bilde.fill(GRÅ)
         
@@ -134,6 +136,7 @@ class Platform:
         # Setter x- og y-posisjonen til platformen
         self.rect.x = x
         self.rect.y = y
+        
         
 class Kule:
     def __init__(self, x, y, r):
@@ -160,6 +163,7 @@ class Kule:
             self.rektangel = pg.Rect(self.senter[0], self.senter[1], self.radius, self.radius)
             if self.venstre == True:
                 self.senter = (self.senter[0] - self.fart[0], self.senter[1])
+                self.x -= self.fart[0] # HER
             else:
                 self.senter = (self.senter[0] + self.fart[0], self.senter[1])
                 self.x += self.fart[0]

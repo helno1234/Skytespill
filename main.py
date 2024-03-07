@@ -38,7 +38,6 @@ class Spillbrett:
 
 
     def ny(self):
-        #print(self.spiller_1.ammo)
         platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
         
@@ -100,8 +99,10 @@ class Spillbrett:
     def hendelser(self):
         # Går gjennom hendelser (events)
         for hendelse in pg.event.get():
+            
             # Sjekker om vi ønsker å lukke vinduet
             if hendelse.type == pg.QUIT:
+                print("HALO")
                 if self.spiller_spill:
                     self.spiller_spill = False
 
@@ -116,7 +117,7 @@ class Spillbrett:
                 if hendelse.key == pg.K_e:
                     if self.spiller_1.ammo > 0:
                         # print(f"Ammo 1 = {self.spiller_1.ammo}")
-                        self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius)
+                        self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius, 1)
                         self.spiller_1.ammo -= 1
                     
                 if hendelse.key == pg.K_q:
@@ -126,7 +127,7 @@ class Spillbrett:
                 
                 if hendelse.key == pg.K_o:
                     if self.spiller_2.ammo > 0:
-                        self.opprett_kule(self.spiller_2, self.spiller_2.kule_radius)
+                        self.opprett_kule(self.spiller_2, self.spiller_2.kule_radius, 1)
                         self.spiller_2.ammo -= 1
                     print(f"Ammo 2 = {self.spiller_2.ammo}")
                         
@@ -141,8 +142,8 @@ class Spillbrett:
                         self.spiller_2.hopp()
              
              
-    def opprett_kule(self, spiller, radius, høyre = True):
-        ny_kule = Kule(spiller.rect.x + SPILLER_BREDDE, spiller.rect.y + SPILLER_HØYDE//2, radius)
+    def opprett_kule(self, spiller, radius, i = 0, høyre = True):
+        ny_kule = Kule(spiller.rect.x + (SPILLER_BREDDE)*i, spiller.rect.y + SPILLER_HØYDE//2, radius)
         ny_kule.skutt = True
         if høyre:
             ny_kule.venstre = False
@@ -153,7 +154,13 @@ class Spillbrett:
     def oppdater(self):
         self.spiller_1.oppdater()
         self.spiller_2.oppdater()
-        #print(self.spiller_2.rect.x, self.spiller_2.rect.y)
+        
+         # Sjekker om spillerne kolliderer
+        if self.spiller_1.rect.colliderect(self.spiller_2.rect):
+            # Hvis de kolliderer, får de en motsatt x-fart
+            self.spiller_1.fart[0] = -self.spiller_1.fart[0]*2
+            self.spiller_2.fart[0] = -self.spiller_2.fart[0]*2
+        
         
         for kule in self.spiller_1.kule_liste:
             kule.oppdater()
@@ -161,7 +168,6 @@ class Spillbrett:
                 self.spiller_1.kule_liste.remove(kule)
                 
             if kule.kollisjon(self.spiller_2):
-                #print("Treffer spiller 2")
                 self.spiller_1.kule_liste.remove(kule)
                 self.poeng_1 += 1
                 print(f"Spiller 1: {self.poeng_1}. Spiller 2: {self.poeng_2}")
@@ -170,9 +176,6 @@ class Spillbrett:
             kule.oppdater()
             if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
                 self.spiller_2.kule_liste.remove(kule)
-                
-            #print(self.spiller_1.rect)
-            #print(kule.senter)
 
             if kule.kollisjon(self.spiller_1):
                 print("Treffer spiller 1")
@@ -196,12 +199,13 @@ class Spillbrett:
                     spiller.fart[1] = 0
 
         
-    def tegne(self):        
-        # Henter sky-bildet og endrer størrelsen slik at den passer til skjerm, uavhengig av størrelse
-        himmel_bilde = pg.transform.scale(pg.image.load("himmel_skytespill.jpeg"), (BREDDE, HØYDE))
+        
+    def tegne(self):     
+        himmel = pg.Surface((BREDDE, HØYDE))
+        himmel.fill(MØRKEBLÅ)
         
         # Tegner bakgrunnsbildet på skjermen
-        self.overflate.blit(himmel_bilde, (0, 0))
+        self.overflate.blit(himmel, (0, 0))
 
         # Tegner plattformene
         for platform in platform_liste:
@@ -218,9 +222,12 @@ class Spillbrett:
         for kule in self.spiller_2.kule_liste:
         # Tegner kule
             pg.draw.circle(self.overflate, SVART, kule.senter, kule.radius)
-            
+
         # Tegner rektangelet rundt spiller 1
-        # pg.draw.rect(self.overflate, RØD, (SPILLER_BREDDE, SPILLER_HØYDE, self.spiller_1.pos[0], self.spiller_1.pos[1]), 2)
+        pg.draw.rect(self.overflate, RØD, (self.spiller_1.rect), 2)
+        # rect.
+        pg.draw.rect(self.overflate, GRØNN, (self.spiller_2.rect), 2)
+        
         
         # "Flipper" displayet for å vise hva vi har tegnet
         pg.display.flip()
@@ -328,52 +335,9 @@ class Spillbrett:
     
                 if hendelse.key == pg.K_w:
                     self.kjøpe_oppdateringer(self.spiller_1, self.poeng_1)
-                    """
-                    if self.poeng_1 < int(self.spiller_1.priser[self.spiller_1.gyldig]):
-                        self.spiller_1.gyldig_farge = RØD
-                    else:
-                        if self.spiller_1.gyldig == 0:
-                            self.spiller_1.ammo += 10
-                            self.spiller_1.ammo_pris = str(int(self.spiller_1.ammo_pris) + 5)
-                            
-                        if self.spiller_1.gyldig == 1:
-                            self.spiller_1.kule_radius += 1
-                            self.spiller_1.kule_pris = str(int(self.spiller_1.kule_pris) + 5)
-                           
-                        if self.spiller_1.gyldig == 3:
-                            for s in self.spillere:
-                                if s != self.spiller_1:
-                                    if spiller_poeng_ordbok[self.spiller_1] == self.poeng_1:
-                                        if self.poeng_2 > 1:
-                                            self.poeng_2 = self.poeng_2//2
-                                        else:
-                                            self.spiller_1.gyldig_farge = RØD
-                                    else:
-                                        if self.poeng_1 > 1:
-                                            self.poeng_1 = self.poeng_1//2
-                                        else:
-                                            self.spiller_2.gydlig_farge = RØD
-                                        
-                                        
-                        self.poeng_1 -= int(self.spiller_1.priser[self.spiller_1.gyldig])
-                        """
                     
                 if hendelse.key == pg.K_i:
                     self.kjøpe_oppdateringer(self.spiller_2, self.poeng_2)
-                    """
-                    if self.poeng_2 < int(self.spiller_2.priser[self.spiller_2.gyldig]):
-                        self.spiller_2.gyldig_farge = RØD
-                    else:
-                        if self.spiller_2.gyldig == 0:
-                            self.spiller_2.ammo += 10
-                            self.spiller_2.ammo_pris = str(int(self.spiller_2.ammo_pris) + 5)
-                        
-                        if self.spiller_2.gyldig == 1:
-                            self.spiller_2.kule_radius += 1
-                            self.spiller_2.kule_pris = str(int(self.spiller_2.kule_pris) + 5)
-                            
-                        self.poeng_2 -= int(self.spiller_2.priser[self.spiller_2.gyldig])
-                    """
         
         # Liste med oppdateringstekster
         oppdateringstekster = ["+ 10 ammo", "Større kule", "TESTING", "STJELE ???"]

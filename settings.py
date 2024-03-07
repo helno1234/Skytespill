@@ -15,10 +15,11 @@ FPS = 60
 # Farger (RGB)
 SVART = (0, 0, 0)
 HVIT = (255, 255, 255)
-GRÅ = (50, 50, 50)
+GRÅ = (30, 30, 30)
 LYSE_GRÅ = (150, 150, 150)
 GRØNN = (0, 255, 0)
 RØD = (255, 0, 0)
+MØRKEBLÅ = (50, 50, 100)
 
 # Platformer
 PLATFORM_HØYDE = 25
@@ -40,7 +41,7 @@ BOKS_AVSTAND = 10
 # KULE_RADIUS = 10
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 2
+SPILLRUNDER_TID = 16
 
 # Fonter til skrift
 FONT1 = pg.font.Font(None, 36)
