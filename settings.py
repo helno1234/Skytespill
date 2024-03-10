@@ -10,7 +10,7 @@ HØYDE = 600
 STØRRELSE = (BREDDE, HØYDE)
 
 # Frames per second (bilder per sekund)
-FPS = 60
+FPS = 120
 
 # Farger (RGB)
 SVART = (0, 0, 0)
@@ -18,31 +18,41 @@ HVIT = (255, 255, 255)
 GRÅ = (30, 30, 30)
 LYSE_GRÅ = (150, 150, 150)
 GRØNN = (0, 255, 0)
-RØD = (255, 0, 0)
-MØRKEBLÅ = (50, 50, 100)
+RØD = (200, 0, 0)
+MØRKEBLÅ = (70, 70, 120)
+GUL = (255, 255, 0)
 
 # Platformer
 PLATFORM_HØYDE = 25
-PLATFORM_BREDDE = 200
+PLATFORM_BREDDE = 130
 
-GRAV = 0.8
+GRAV = 0.4
 
 # Innstillinger til spilleren
 SPILLER_BREDDE = 75
 SPILLER_HØYDE = 110
-SPILLER_AKS = 0.4
+SPILLER_AKS = 0.2
 SPILLER_FRIKSJON = -0.10
 
 # Innstillinger til oppdateringsbokser
 BOKS_HØYDE = 50
 BOKS_AVSTAND = 10
 
-# Innstillinger til kule
-# KULE_RADIUS = 10
+# Innstillinger til peneobjektet
+PENGE_BREDDE = 30
+PENGE_HØYDE = 30
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 16
+SPILLRUNDER_TID = 5
+
+# Bredde og høyde for taster (startskjerm)
+TAST_BREDDE = 40
+TAST_HØYDE = TAST_BREDDE
+
+TAST_AVSTAND = 10
 
 # Fonter til skrift
 FONT1 = pg.font.Font(None, 36)
 FONT2 = pg.font.Font(None, 24)
+STOR_FONT = pg.font.Font(None, 100)
+LITT_STOR_FONT = pg.font.Font(None, 70)
