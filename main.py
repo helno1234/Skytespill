@@ -24,8 +24,8 @@ class Spillbrett:
         self.gyldig_startskjerm = True
         
         # Poeng til spiller_1 og spiller_2
-        self.poeng_1 = 40
-        self.poeng_2 = 40
+        self.poeng_1 = 20
+        self.poeng_2 = 20
         
         self.oppgraderings_boks = oppgraderings_boks()
         
@@ -53,7 +53,7 @@ class Spillbrett:
     def kjør(self):        
         # Ingen har tatt pengen 
         self.penge_tatt = False
-        
+    
         # Lager en liste til platformene, og legger til bakken
         self.platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
 
@@ -142,6 +142,9 @@ class Spillbrett:
             
             # I spillet, dersom spillrunden ikke er ferdig
             while ny_tid - self.start_tid < SPILLRUNDER_TID and self.spiller_spill:
+                
+                ny_tid = time.time()
+                
                 if self.poeng_1 >= 50:
                     self.spiller_spill = False
                     self.vinner = "Spiller 1"
@@ -152,7 +155,8 @@ class Spillbrett:
                     self.vinner_poeng = f"Med {self.poeng_2} poeng!"
                     self.vinner_farge = GRØNN
                     self.spiller_spill = False
-
+                    
+                
                 pg.mixer.music.set_volume(1.0)
                     
                 self.klokke.tick(FPS)
@@ -160,8 +164,6 @@ class Spillbrett:
                 self.hendelser()
                 self.oppdater()
                 self.tegne()
-                
-                ny_tid = time.time()
                 
                 # Ordbok med spiller og poeng:
                 self.spiller_poeng_ordbok = {
@@ -185,6 +187,8 @@ class Spillbrett:
                             self.spiller_spill = True
                             self.kjører = False
                     pg.display.flip()
+                    
+            print(ny_tid)
             
                     
     def hendelser(self):
