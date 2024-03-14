@@ -1,1 +1,1 @@
-Skytespill, basert på systemutviklingsmetoden: smidig metode
+Skytespill, basert på systemutviklingsverktøy: smidig metode
