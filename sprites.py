@@ -20,10 +20,17 @@ class Spiller:
         self.fart = [0, 0]
         self.aks = [0, 0]
         
+        self.retning_venstre = True
+        
         # Tom liste for oppgraderinger
         self.oppgraderingsliste = []
         
         self.gyldig_pris_ammo = 0
+        
+        self.mulige_granater = 3
+        
+        self.granater = []
+        self.eksplosjoner = []
         
         self.ammo_pris = "1"
         self.kule_pris = "1"
@@ -107,9 +114,11 @@ class SpillerH(Spiller):
         
         if keys[pg.K_j]:
             self.aks[0] = -SPILLER_AKS
+            self.retning_venstre = True
             
         if keys[pg.K_l]:
             self.aks[0] = SPILLER_AKS
+            self.retning_venstre = False
             
             
 # Klasse for spillobjekt som bruker piltaster
@@ -126,9 +135,11 @@ class SpillerV(Spiller):
         
         if keys[pg.K_a]:
             self.aks[0] = -SPILLER_AKS
+            self.retning_venstre = True
             
         if keys[pg.K_d]:
             self.aks[0] = SPILLER_AKS
+            self.retning_venstre = False
     
 
 class Platform:
@@ -166,7 +177,7 @@ class Kule:
 
     def oppdater(self):
         if self.skutt:
-            self.fart = [self.farten,0]
+            self.fart = [self.farten, 0]
             self.rektangel = pg.Rect(self.senter[0], self.senter[1], self.radius, self.radius)
             if self.venstre == True:
                 self.senter = (self.senter[0] - self.fart[0], self.senter[1])
@@ -180,7 +191,7 @@ class Kule:
     def kollisjon(self, objekt):
         return self.rektangel.colliderect(objekt.rect)
     
-class oppgraderings_boks:
+class Oppgraderings_boks:
     def __init__(self):
         self.x = BREDDE//2 - BREDDE//4
         self.y = HØYDE//3
@@ -214,5 +225,117 @@ class Tast_startskjerm:
         self.høyde = TAST_HØYDE
         self.x = x
         self.y = y
+        
+        
+class Granat:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.fart = [7,-11]
+      
+        self.skutt = False
+        
+        self.venstre = True
+        
+        self.bilde = pg.Surface((PENGE_BREDDE, PENGE_HØYDE))
+        self.bilde.fill(GRØNN)
+        
+        self.rect = self.bilde.get_rect()
+        self.rect.center = (self.rect.x,self.rect.y)
+        
+        self.senter = (self.x, self.y)
+        
+        self.bredde = GRANAT_RADIUS
+        self.høyde = GRANAT_RADIUS
+        
+        self.truffet_bakken = False
+        self.eksplosjon = False
+
+    def oppdater_rektangel(self):
+         return pg.Rect(self.x, self.y, GRANAT_RADIUS, GRANAT_RADIUS)
+
+    def oppdater(self):
+        if self.skutt:
+            if self.y >= HØYDE - PLATFORM_HØYDE - GRANAT_RADIUS and not self.truffet_bakken:
+                self.truffet_bakken = True
+                self.start_tiden = time.time()
+                self.y = HØYDE - PLATFORM_HØYDE - GRANAT_RADIUS
+                
+                self.senter = (self.x, self.y)
+            elif self.truffet_bakken:
+                self.ny_tid = time.time()
+                if self.ny_tid - self.start_tiden >= VENTE_EKSPLOSJON:
+                    eksplosjon_lyd = pg.mixer.Sound("eksplosjon_lydeffekt_2.mp3")
+                    eksplosjon_lyd.set_volume(0.5)
+                    eksplosjon_lyd.play()
+                    self.eksplosjon = True
+            else:
+                self.fart[1] += GRAV
+                self.rektangel = pg.Rect(self.senter[0], self.senter[1], GRANAT_RADIUS, GRANAT_RADIUS)
+                
+                if self.venstre:
+                    self.x -= self.fart[0]
+                else:
+                    self.x += self.fart[0]
+                    
+                self.y += self.fart[1]
+                    
+                self.fart[1] += GRAV
+                    
+                self.senter = (self.x, self.y)
+            
+class Eksplosjon:
+    def __init__(self, x, y, overflate):
+        self.x = x
+        self.y = y
+        
+        self.senter = (self.x, self.y)
+        
+        self.bilde_farger = [RØD, ORANSJE, GUL]
+        
+        self.teller = 0
+        
+        self.radius = GRANAT_RADIUS
+        
+        self.indeks = 0
+        
+        self.radius_økning = 5
+        
+        self.eksplosjon_ferdig = False
+        
+        self.truffet_spiller = False
+        
+        self.rektangel = pg.Rect(self.x, self.y, GRANAT_RADIUS + 2*self.radius_økning, GRANAT_RADIUS + 2*self.radius_økning)
+        
+        self.farge = self.bilde_farger[self.indeks]
+        
+    def oppdater(self):
+        self.farge = self.bilde_farger[self.indeks]
+        
+        self.teller += 1
+        
+        if self.teller >= 6:
+            self.teller = 0
+            self.indeks += 1
+            self.radius += self.radius_økning
+        
+        if self.indeks >= 3:
+            self.eksplosjon_ferdig = True
+            
+    def kollisjon(self, objekt):
+        return self.rektangel.colliderect(objekt.rect)
+        """
+        self.bilde = pg.image.load("eksplosjon.jpeg")
+        self.bilde = pg.transform.scale(self.bilde, (GRANAT_RADIUS, GRANAT_RADIUS))
+        """ 
+            
+            
+            
+            
+            
+            
+            
+        
+        
         
     

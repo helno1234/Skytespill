@@ -27,7 +27,9 @@ class Spillbrett:
         self.poeng_1 = 20
         self.poeng_2 = 20
         
-        self.oppgraderings_boks = oppgraderings_boks()
+        self.ikke_tom_ammo = True
+        
+        self.oppgraderings_boks = Oppgraderings_boks()
         
         # Lager spiller-objekt
         self.spiller_2 = SpillerH()
@@ -37,11 +39,18 @@ class Spillbrett:
         self.priser_2 = [self.spiller_2.ammo_pris, self.spiller_2.kule_pris, self.spiller_2.kule_fart_pris, self.spiller_2.stjele_pris]
         
         self.spillere = [self.spiller_1, self.spiller_2]
+        
+        # Ordbok med spiller og poeng:
+        self.spiller_poeng_ordbok = {
+            self.spiller_1: 1,
+            self.spiller_2: 2
+            }
 
         self.penge_x = random.randint(PLATFORM_BREDDE + 50, BREDDE-PLATFORM_BREDDE - 50)
+        self.granat = False
         
         pg.mixer.music.load("battle-music.mp3")
-        pg.mixer.music.set_volume(0.6)
+        pg.mixer.music.set_volume(0.3)
         pg.mixer.music.play(fade_ms = 10000, loops=10)
         
     def ny(self):
@@ -49,11 +58,7 @@ class Spillbrett:
         
         self.kjør()
         
-    
-    def kjør(self):        
-        # Ingen har tatt pengen 
-        self.penge_tatt = False
-    
+    def nye_platformer(self):
         # Lager en liste til platformene, og legger til bakken
         self.platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
 
@@ -91,6 +96,13 @@ class Spillbrett:
             else:
                 print("Plattformen kolliderte, prøver på nytt") 
         
+    
+    def kjør(self):        
+        # Ingen har tatt pengen 
+        self.penge_tatt = False
+    
+        self.nye_platformer()
+        
         
         while self.gyldig_startskjerm:
             for hendelse in pg.event.get():
@@ -112,14 +124,14 @@ class Spillbrett:
         if self.spiller_spill:
             
             # Når spillerunden er ferdig
-            while ny_tid - self.start_tid >= SPILLRUNDER_TID and self.spiller_spill:
+            while ny_tid - self.start_tid >= SPILLRUNDER_TID or not self.ikke_tom_ammo and self.spiller_spill:
                 for hendelse in pg.event.get():
                     if hendelse.type == pg.QUIT:
                         self.spiller_spill = False
                         self.kjører = False
                         
                 # Setter ned volum på bakgrunnsmusikken
-                pg.mixer.music.set_volume(0.3)
+                pg.mixer.music.set_volume(0.2)
                 
                 self.tegne_pause("Spiller 1", "Spiller 2", self.spiller_1.ammo, self.spiller_2.ammo)
                 
@@ -132,16 +144,10 @@ class Spillbrett:
                 self.tegne_oppgraderinger(self.spiller_2, self.priser_2)
                 
                 pg.display.flip()
-                
-                # Ordbok med spiller og poeng:
-                self.spiller_poeng_ordbok = {
-                    self.spiller_1: 1,
-                    self.spiller_2: 2
-                    }
             
             
             # I spillet, dersom spillrunden ikke er ferdig
-            while ny_tid - self.start_tid < SPILLRUNDER_TID and self.spiller_spill:
+            while ny_tid - self.start_tid < SPILLRUNDER_TID and self.spiller_spill and self.ikke_tom_ammo:
                 
                 ny_tid = time.time()
                 
@@ -156,7 +162,9 @@ class Spillbrett:
                     self.vinner_farge = GRØNN
                     self.spiller_spill = False
                     
-                
+                #if self.granat:
+                    #granat = Granat(self.spiller_1.rect.x, self.spiller_1.rect.y, -1)
+                    #self.spiller_1.granater.append(granat)
                 pg.mixer.music.set_volume(1.0)
                     
                 self.klokke.tick(FPS)
@@ -175,6 +183,9 @@ class Spillbrett:
                     if hendelse.type == pg.QUIT:
                         self.spiller_spill = False
                         self.kjører = False
+                        
+                if self.spiller_1.ammo <= 0 and self.spiller_2.ammo <= 0:
+                    self.ikke_tom_ammo = False
             
             
             if self.kjører:
@@ -196,6 +207,16 @@ class Spillbrett:
         for hendelse in pg.event.get():
                 
             if hendelse.type == pg.KEYDOWN:
+                if hendelse.key == pg.K_q:
+                    if self.spiller_1.mulige_granater > 0:
+                        self.opprett_granat(self.spiller_1, self.spiller_1.retning_venstre)
+                        self.spiller_1.mulige_granater -= 1
+                    
+                if hendelse.key == pg.K_u:
+                    if self.spiller_2.mulige_granater > 0:
+                        self.opprett_granat(self.spiller_2, self.spiller_2.retning_venstre)
+                        self.spiller_2.mulige_granater -= 1
+                
                 # Spiller 1 skal hoppe hvis vi trykker på mellomromstasten
                 if hendelse.key == pg.K_w:
                     # Kan kun hoppe dersom spilleren er nede på bakken
@@ -211,29 +232,37 @@ class Spillbrett:
                 if hendelse.key == pg.K_e:
                     # Spiller 1 skyter kule mot venstre
                     if self.spiller_1.ammo > 0:
-                        self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius, 1)
+                        if self.spiller_1.retning_venstre:
+                            i = 0
+                        else:
+                            i = 1
+                        
+                        self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius, self.spiller_1.retning_venstre, i)
                         self.spiller_1.ammo -= 1
-                    
-                if hendelse.key == pg.K_q:
-                    # Spiller 1 skyter kule mot høyre
-                    if self.spiller_1.ammo > 0:
-                        self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius, høyre = False)
-                        self.spiller_1.ammo -= 1
+                
                 
                 if hendelse.key == pg.K_o:
                     # Spiller 2 skyter kule mot venstre
                     if self.spiller_2.ammo > 0:
-                        self.opprett_kule(self.spiller_2, self.spiller_2.kule_radius, 1)
+                        if self.spiller_2.retning_venstre:
+                            i = 0
+                        else:
+                            i = 1
+                        
+                        self.opprett_kule(self.spiller_2, self.spiller_2.kule_radius, self.spiller_2.retning_venstre, i)
                         self.spiller_2.ammo -= 1
-                
-                if hendelse.key == pg.K_u:
-                    # Spiller 2 skyter kule mot høyre
-                    if self.spiller_2.ammo > 0:
-                        self.opprett_kule(self.spiller_2, self.spiller_2.kule_radius, høyre = False)
-                        self.spiller_2.ammo -= 1
+           
+    def opprett_granat(self, spiller, retning_venstre):
+        ny_granat = Granat(spiller.rect.x + (1/2)*SPILLER_BREDDE, spiller.rect.y)
+        ny_granat.skutt = True
+        if not retning_venstre:
+            ny_granat.venstre = False
+        # Legger til granat i spilleren sin liste
+        spiller.granater.append(ny_granat)
+        self.granat = spiller.granater[-1]
+
              
-             
-    def opprett_kule(self, spiller, radius, i = 0, høyre = True):
+    def opprett_kule(self, spiller, radius, retning_venstre, i = 0):
         # Lager skudd-lyd når det blir skutt en kule
         skudd_lyd = pg.mixer.Sound("skudd.mp3")
         skudd_lyd.set_volume(0.1)
@@ -241,7 +270,7 @@ class Spillbrett:
         
         ny_kule = Kule(spiller.rect.x + (SPILLER_BREDDE)*i, spiller.rect.y + SPILLER_HØYDE//2, radius, spiller.kule_fart)
         ny_kule.skutt = True
-        if høyre:
+        if not retning_venstre:
             ny_kule.venstre = False
         # Legger til kule i spilleren sin liste
         spiller.kule_liste.append(ny_kule)
@@ -253,58 +282,78 @@ class Spillbrett:
         self.spiller_2.oppdater()
         
         # Sjekker om spillerne lander oppå hverandre
-        if self.spiller_1.rect.colliderect(self.spiller_2.rect) and self.spiller_1.rect.y < self.spiller_2.rect.y:
+        if self.spiller_1.rect.colliderect(self.spiller_2.rect) and self.spiller_1.rect.y <= self.spiller_2.rect.y:
             self.spiller_1.fart[1] = -self.spiller_1.fart[1]
             
-        elif self.spiller_1.rect.colliderect(self.spiller_2.rect) and self.spiller_2.rect.y < self.spiller_1.rect.y:
+        elif self.spiller_1.rect.colliderect(self.spiller_2.rect) and self.spiller_2.rect.y <= self.spiller_1.rect.y:
             self.spiller_2.fart[1] = -self.spiller_2.fart[1]
             
         # Sjekker om spillerne kolliderer
-        elif self.spiller_1.rect.colliderect(self.spiller_2.rect) and self.spiller_1.rect.y >= self.spiller_2.rect.y:        
+        if self.spiller_1.rect.colliderect(self.spiller_2.rect):
+            if self.spiller_1.rect.x > self.spiller_2.rect.x - SPILLER_BREDDE or self.spiller_1.rect.x < self.spiller_2.rect.x + SPILLER_BREDDE:
                 # Hvis de kolliderer, får de en motsatt x-fart
                 self.spiller_1.fart[0] = -self.spiller_1.fart[0]*2
                 self.spiller_2.fart[0] = -self.spiller_2.fart[0]*2
-            
+        
         # Sjekker kollisjon med penge_objekt og spillerobjektene
         if not self.penge_tatt:
-            if self.spiller_1.rect.colliderect(self.penge_objekt.rect):
-                # Spiller "penge"-lyd som symboliserer at en spiller har tatt pengen
-                skudd_lyd = pg.mixer.Sound("ta_penge.mp3")
-                skudd_lyd.set_volume(0.7)
-                skudd_lyd.play()
-                
-                self.poeng_1 += 5
-                self.penge_tatt = True
-                
-            if self.spiller_2.rect.colliderect(self.penge_objekt.rect):
-                # Spiller "penge"-lyd som symboliserer at en spiller har tatt pengen
-                skudd_lyd = pg.mixer.Sound("ta_penge.mp3")
-                skudd_lyd.set_volume(0.7)
-                skudd_lyd.play()
-                
-                self.poeng_2 += 5
-                self.penge_tatt = True
-        
-        for kule in self.spiller_1.kule_liste:
-            kule.oppdater()
-            # Sjekker kollisjon med kule_objektene og veggene på spillbrettet
-            if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
-                self.spiller_1.kule_liste.remove(kule)
-                
-            # Sjekker kollisjon med kule_objektene og spillerobjektene
-            if kule.kollisjon(self.spiller_2):
-                self.spiller_1.kule_liste.remove(kule)
-                self.poeng_1 += 1
-        
-        for kule in self.spiller_2.kule_liste:
-            kule.oppdater()
-            if kule.senter[0] < 0 or kule.senter[0] > BREDDE:
-                self.spiller_2.kule_liste.remove(kule)
+            for spiller in self.spillere:
+                if spiller.rect.colliderect(self.penge_objekt.rect):
+                    # Spiller "penge"-lyd som symboliserer at en spiller har tatt pengen
+                    skudd_lyd = pg.mixer.Sound("ta_penge.mp3")
+                    skudd_lyd.set_volume(0.7)
+                    skudd_lyd.play()
+                    
+                    if self.spiller_poeng_ordbok[spiller] == 1:
+                        self.poeng_1 += 5
+                    else:
+                        self.poeng_2 += 5
+                    self.penge_tatt = True
 
-            if kule.kollisjon(self.spiller_1):
-                print("Treffer spiller 1")
-                self.spiller_2.kule_liste.remove(kule)
-                self.poeng_2 += 1
+        def oppdatering_av_objektene(liste, spiller, annen_spiller,
+                                     kollisjon = True,  eksplosjonen = False):
+            for objekt in liste:
+                objekt.oppdater()
+                
+                if kollisjon:
+                    if objekt.kollisjon(annen_spiller):
+                        liste.remove(objekt)
+                        if spiller == self.spillere[0]:
+                            self.poeng_1 += 1
+                        else:
+                            self.poeng_2 += 1
+                
+                if eksplosjonen:
+                    if objekt.eksplosjon:
+                        spiller.eksplosjoner.append(Eksplosjon(objekt.senter[0], objekt.senter[1], self.overflate))
+                        liste.remove(objekt)
+                
+
+                if objekt.senter[0] <= 0 or objekt.senter[0] >= BREDDE:
+                    liste.remove(objekt)
+               
+        
+        oppdatering_av_objektene(self.spiller_1.kule_liste, self.spiller_1, self.spiller_2)
+        oppdatering_av_objektene(self.spiller_2.kule_liste, self.spiller_2, self.spiller_1)
+        
+        oppdatering_av_objektene(self.spiller_1.granater, self.spiller_1, self.spiller_2, kollisjon = False, eksplosjonen = True)
+        oppdatering_av_objektene(self.spiller_2.granater, self.spiller_2, self.spiller_1, kollisjon = False, eksplosjonen = True)
+        
+
+        for spiller in self.spillere:
+            for eksplosjon in spiller.eksplosjoner:
+                eksplosjon.oppdater()
+                if not eksplosjon.truffet_spiller:
+                    if eksplosjon.kollisjon(self.spiller_1):
+                            self.poeng_2 += 5
+                    if eksplosjon.kollisjon(self.spiller_2):
+                            self.poeng_1 += 5
+                        
+                    eksplosjon.truffet_spiller = True
+                        
+                if eksplosjon.eksplosjon_ferdig:
+                    spiller.eksplosjoner.remove(eksplosjon)
+
                 
         # Sjekker om spillerne faller
         for spiller in self.spillere:
@@ -337,19 +386,33 @@ class Spillbrett:
         # Tegner plattformene
         for platform in self.platform_liste:
             self.overflate.blit(platform.bilde, (platform.rect.x, platform.rect.y))
-            
-        # Tegner spilleren
-        self.overflate.blit(self.spiller_1.bilde, self.spiller_1.pos)
-        self.overflate.blit(self.spiller_2.bilde, self.spiller_2.pos)
         
-        for kule in self.spiller_1.kule_liste:
-        # Tegner kule
-            pg.draw.circle(self.overflate, SVART, kule.senter, kule.radius)
+        def tegne_sirklene(liste, farge, i = 0, j = 0):
+            for objekt in liste:
+                if i == 1:
+                    radius = objekt.radius
+                if j == 1:
+                    farge = objekt.farge
+                
+                if i != 1:
+                    radius = GRANAT_RADIUS
+                    
+                pg.draw.circle(self.overflate, farge, objekt.senter, radius)
         
-        for kule in self.spiller_2.kule_liste:
-        # Tegner kule
-            pg.draw.circle(self.overflate, SVART, kule.senter, kule.radius)
+        for spiller in self.spillere:
+            # Tegner spilleren
+            self.overflate.blit(spiller.bilde, spiller.pos)
 
+            tegne_sirklene(spiller.kule_liste, SVART, i = 1)
+            tegne_sirklene(spiller.granater, MØRKE_RØD)
+            tegne_sirklene(spiller.eksplosjoner, RØD, i = 1, j = 1)
+            
+        for i in range(self.spiller_2.mulige_granater):
+            pg.draw.circle(self.overflate, MØRKE_RØD, (BREDDE - 60 - 40*i, 80), GRANAT_RADIUS)
+            
+        for i in range(self.spiller_1.mulige_granater):
+            pg.draw.circle(self.overflate, MØRKE_RØD, (60 + 40*i, 80), GRANAT_RADIUS)
+            
         # Tegner rektangelet rundt spiller 1
         pg.draw.rect(self.overflate, RØD, (self.spiller_1.rect), 2)
         # rect.
@@ -358,6 +421,7 @@ class Spillbrett:
         # Tegner penge_objektet:
         if not self.penge_tatt:
             self.overflate.blit(self.penge_objekt.bilde, (self.penge_objekt.rect.x, self.penge_objekt.rect.y))
+            
             
         # Tegner poeng og ammo øverst i hjørnet, slik at de som spiller kan se det samtidig
         self.hjørne_informasjon(self.spiller_1, 10, self.poeng_1, self.spiller_1.ammo, i = 1, j = 0)
@@ -424,7 +488,9 @@ class Spillbrett:
             
             
         def taster_i_listen(i,j,k, y_pos, gyldighet = False):
-            tast = Tast_startskjerm(self.sentrere_tekst(FONT1.render("Spiller 1", True, HVIT), gyldig=gyldighet) + FONT1.size("Spiller 1")[0]/2 + i * (TAST_BREDDE * (1/2 + j) + TAST_AVSTAND * k), y_pos)
+            tast = Tast_startskjerm(self.sentrere_tekst(FONT1.render("Spiller 1", True, HVIT),
+                                                        gyldig=gyldighet) + FONT1.size("Spiller 1")[0]/2 + i * (TAST_BREDDE * (1/2 + j) + TAST_AVSTAND * k),
+                                                        y_pos)
             taster.append(tast)
         
         taster = []
@@ -540,7 +606,7 @@ class Spillbrett:
                         
                     self.kjører = False # Spillet skal avsluttes
                     
-                    
+                # Nye innstillinger
                 if hendelse.key == pg.K_RETURN:
                     self.spiller_1.rect.center = (
                         10, 0
@@ -565,6 +631,11 @@ class Spillbrett:
                     
                     self.start_tid = time.time()
                     self.gyldig_spilling = True
+                    
+                    self.spiller_1.mulige_granater = 3
+                    self.spiller_2.mulige_granater = 3
+                    
+                    self.ikke_tom_ammo = True
     
     
                 if hendelse.key == pg.K_w:

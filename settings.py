@@ -19,8 +19,10 @@ GRÅ = (30, 30, 30)
 LYSE_GRÅ = (150, 150, 150)
 GRØNN = (0, 255, 0)
 RØD = (200, 0, 0)
+MØRKE_RØD = (100, 0, 0)
 MØRKEBLÅ = (70, 70, 120)
 GUL = (255, 255, 0)
+ORANSJE = (255, 140, 0)
 
 # Platformer
 PLATFORM_HØYDE = 25
@@ -43,13 +45,19 @@ PENGE_BREDDE = 30
 PENGE_HØYDE = 30
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 10
+SPILLRUNDER_TID = 30
 
 # Bredde og høyde for taster (startskjerm)
 TAST_BREDDE = 40
 TAST_HØYDE = TAST_BREDDE
 
 TAST_AVSTAND = 10
+
+GRANAT_RADIUS = 10
+VENTE_EKSPLOSJON = 1
+
+
+
 
 # Fonter til skrift
 FONT1 = pg.font.Font(None, 36)
