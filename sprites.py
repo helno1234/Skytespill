@@ -3,20 +3,10 @@ import time
 from settings import *
 
 class Spiller:
-    def __init__(self):
-        # self.bilde = pg.Surface((SPILLER_BREDDE, SPILLER_HØYDE))
-        self.bilde = pg.transform.scale(pg.image.load("mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
-        # self.bilde.fill(GRØNN)
-        self.rect = self.bilde.get_rect()
-        self.rect.center = (
-            10, 0
-        )
-        
+    def __init__(self):        
         self.bilde_logo = pg.Surface((30, 50))
         self.bilde_logo.fill(RØD)
         
-        
-        self.pos = list(self.rect.center)
         self.fart = [0, 0]
         self.aks = [0, 0]
         
@@ -97,6 +87,9 @@ class Spiller:
 class SpillerH(Spiller):
     def __init__(self):
         super().__init__()
+        self.bilde = pg.transform.scale(pg.image.load("luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        self.rect = self.bilde.get_rect()
+    
         self.rect.center = (
         BREDDE - SPILLER_BREDDE - 10,
         10
@@ -125,6 +118,13 @@ class SpillerH(Spiller):
 class SpillerV(Spiller):
     def __init__(self):
         super().__init__()
+        self.bilde = pg.transform.scale(pg.image.load("mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        self.rect = self.bilde.get_rect()
+        self.rect.center = (
+            10, 0
+        )
+        
+        self.pos = list(self.rect.center)
         
     def oppdater(self):
         super().oppdater()
@@ -144,7 +144,6 @@ class SpillerV(Spiller):
 
 class Platform:
     def __init__(self, x, y, b, h):
-        # self.bilde = pg.transform.scale(pg.image.load("murstein.jpeg"), (b,h))
         self.bilde = pg.Surface((b, h))
         self.bilde.fill(GRÅ)
         
@@ -238,7 +237,6 @@ class Granat:
         self.venstre = True
         
         self.bilde = pg.Surface((PENGE_BREDDE, PENGE_HØYDE))
-        self.bilde.fill(GRØNN)
         
         self.rect = self.bilde.get_rect()
         self.rect.center = (self.rect.x,self.rect.y)
@@ -262,6 +260,7 @@ class Granat:
                 self.y = HØYDE - PLATFORM_HØYDE - GRANAT_RADIUS
                 
                 self.senter = (self.x, self.y)
+                
             elif self.truffet_bakken:
                 self.ny_tid = time.time()
                 if self.ny_tid - self.start_tiden >= VENTE_EKSPLOSJON:
@@ -270,19 +269,27 @@ class Granat:
                     eksplosjon_lyd.play()
                     self.eksplosjon = True
             else:
+                if self.y >= STOR_PLATFORM_FRA_TAK and self.x <= PLATFORM_BREDDE:
+                    self.fart[0] = 0
+                
+                if self.y >= STOR_PLATFORM_FRA_TAK and self.x >= BREDDE - PLATFORM_BREDDE:
+                    self.fart[0] = 0
+                    
+                else:
+                    if self.venstre:
+                        self.x -= self.fart[0]
+                    else:
+                        self.x += self.fart[0]
+                    
                 self.fart[1] += GRAV
                 self.rektangel = pg.Rect(self.senter[0], self.senter[1], GRANAT_RADIUS, GRANAT_RADIUS)
-                
-                if self.venstre:
-                    self.x -= self.fart[0]
-                else:
-                    self.x += self.fart[0]
                     
                 self.y += self.fart[1]
                     
                 self.fart[1] += GRAV
                     
                 self.senter = (self.x, self.y)
+
             
 class Eksplosjon:
     def __init__(self, x, y, overflate):        

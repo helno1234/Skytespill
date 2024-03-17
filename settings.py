@@ -27,12 +27,13 @@ ORANSJE = (255, 140, 0)
 # Platformer
 PLATFORM_HØYDE = 25
 PLATFORM_BREDDE = 130
+STOR_PLATFORM_FRA_TAK = 350
 
 GRAV = 0.4
 
 # Innstillinger til spilleren
-SPILLER_BREDDE = 75
-SPILLER_HØYDE = 110
+SPILLER_BREDDE = 90
+SPILLER_HØYDE = 135
 SPILLER_AKS = 0.2
 SPILLER_FRIKSJON = -0.10
 
@@ -45,7 +46,7 @@ PENGE_BREDDE = 30
 PENGE_HØYDE = 30
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 30
+SPILLRUNDER_TID = 10
 
 # Bredde og høyde for taster (startskjerm)
 TAST_BREDDE = 40
@@ -56,8 +57,9 @@ TAST_AVSTAND = 10
 GRANAT_RADIUS = 10
 VENTE_EKSPLOSJON = 1
 
-
-
+POENG_PENGE = 5
+POENG_SKUDD = 1
+POENG_GRANAT = 5
 
 # Fonter til skrift
 FONT1 = pg.font.Font(None, 36)

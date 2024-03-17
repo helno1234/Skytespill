@@ -72,6 +72,7 @@ class Spillbrett:
                 if hendelse.type == pg.KEYDOWN:
                     if hendelse.key == pg.K_RETURN:
                         self.gyldig_startskjerm = False
+                        self.start_tid = time.time()
     
             
                 self.startskjerm()
@@ -84,11 +85,6 @@ class Spillbrett:
             
             # Når spillerunden er ferdig
             while ny_tid - self.start_tid >= SPILLRUNDER_TID or not self.ikke_tom_ammo and self.spiller_spill:
-                for hendelse in pg.event.get():
-                    if hendelse.type == pg.QUIT:
-                        self.spiller_spill = False
-                        self.kjører = False
-                        
                 # Setter ned volum på bakgrunnsmusikken
                 pg.mixer.music.set_volume(0.2)
                 
@@ -96,11 +92,17 @@ class Spillbrett:
                 
                 # Lager lister med 4 oppgraderingsbokser til hver spiller
                 for i in range(4):
-                    self.spiller_1.oppgraderingsliste.append([self.oppgraderings_boks.x, self.oppgraderings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppgraderings_boks.b, self.oppgraderings_boks.h])
-                    self.spiller_2.oppgraderingsliste.append([self.oppgraderings_boks.x + 400, self.oppgraderings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i, self.oppgraderings_boks.b, self.oppgraderings_boks.h])
+                    self.spiller_1.oppgraderingsliste.append([self.oppgraderings_boks.x,
+                                                              self.oppgraderings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i,
+                                                              self.oppgraderings_boks.b, self.oppgraderings_boks.h])
+                    self.spiller_2.oppgraderingsliste.append([self.oppgraderings_boks.x + 400,
+                                                              self.oppgraderings_boks.y + (BOKS_HØYDE + BOKS_AVSTAND)*i,
+                                                              self.oppgraderings_boks.b, self.oppgraderings_boks.h])
         
                 self.tegne_oppgraderinger(self.spiller_1, self.priser_1, spiller_1 = True)
                 self.tegne_oppgraderinger(self.spiller_2, self.priser_2)
+                
+                self.sjekke_kryss_ut()
                 
                 pg.display.flip()
             
@@ -166,8 +168,8 @@ class Spillbrett:
         self.platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
 
         # Nye platformer
-        self.platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
-        self.platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
+        self.platform_liste.append(Platform(0, STOR_PLATFORM_FRA_TAK, PLATFORM_BREDDE, HØYDE-STOR_PLATFORM_FRA_TAK-PLATFORM_HØYDE))
+        self.platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, STOR_PLATFORM_FRA_TAK, PLATFORM_BREDDE, HØYDE-STOR_PLATFORM_FRA_TAK-PLATFORM_HØYDE))
         
         # Lager plattformer
         while len(self.platform_liste) < 7:
@@ -304,9 +306,9 @@ class Spillbrett:
                     skudd_lyd.play()
                     
                     if self.spiller_poeng_ordbok[spiller] == 1:
-                        self.poeng_1 += 5
+                        self.poeng_1 += POENG_PENGE
                     else:
-                        self.poeng_2 += 5
+                        self.poeng_2 += POENG_PENGE
                     self.penge_tatt = True
 
         def oppdatering_av_objektene(liste, spiller, annen_spiller,
@@ -318,9 +320,9 @@ class Spillbrett:
                     if objekt.kollisjon(annen_spiller):
                         liste.remove(objekt)
                         if spiller == self.spillere[0]:
-                            self.poeng_1 += 1
+                            self.poeng_1 += POENG_SKUDD
                         else:
-                            self.poeng_2 += 1
+                            self.poeng_2 += POENG_SKUDD
                 
                 if eksplosjonen:
                     if objekt.eksplosjon:
@@ -353,17 +355,18 @@ class Spillbrett:
                 if not eksplosjon.truffet_spiller:
                     if eksplosjon.kollisjon(self.spiller_1):
                         spiller_eksplosjon(self.spiller_1)
-                        self.poeng_2 += 5
+                        self.poeng_2 += POENG_GRANAT
                         
                     if eksplosjon.kollisjon(self.spiller_2):
                         spiller_eksplosjon(self.spiller_2)
-                        self.poeng_1 += 5
+                        self.poeng_1 += POENG_GRANAT
                         
                     eksplosjon.truffet_spiller = True
                         
                 if eksplosjon.eksplosjon_ferdig:
                     spiller.eksplosjoner.remove(eksplosjon)
-
+        
+        
         # Sjekker om spillerne faller
         for spiller in self.spillere:
             if spiller.fart[1] > 0:
@@ -388,7 +391,7 @@ class Spillbrett:
                         
             # Går ikke gjennom de store platformene på siden
             if spiller.pos[0] < PLATFORM_BREDDE or spiller.pos[0] > BREDDE - PLATFORM_BREDDE - SPILLER_BREDDE:
-                if spiller.pos[1] > 350:
+                if spiller.pos[1] > STOR_PLATFORM_FRA_TAK:
                     spiller.fart[0] = -spiller.fart[0]*1.5
                     
         
@@ -464,16 +467,16 @@ class Spillbrett:
         pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
         
         # Stripe for å skille mellom tekster
-        # pg.draw.rect(self.overflate, LYSE_GRÅ, [250, 120, BREDDE-500, 2])
         pg.draw.rect(self.overflate, LYSE_GRÅ, [BREDDE/2, 130, 2, HØYDE - 300])
 
         self.tegne_info_oppe(FONT1, f"Spiller 1", 140, gyldig = True)
         self.tegne_info_oppe(FONT1, f"Spiller 2", 140)
         
-        self.overflate.blit(FONT2.render("Skyte:", True, HVIT), (self.sentrere_tekst(FONT2.render("Skyte:", True, HVIT), gyldig = True), 210))
+        granat_tekst = "Granater Skyte"
+        self.overflate.blit(FONT2.render("Granater           Skyte", True, HVIT), (self.sentrere_tekst(FONT2.render(f"{granat_tekst:28}", True, HVIT), gyldig = True), 210))
         self.overflate.blit(FONT2.render("Bevegelse:", True, HVIT), (self.sentrere_tekst(FONT2.render("Bevegelse:", True, HVIT), gyldig = True), 310))
         
-        self.overflate.blit(FONT2.render("Skyte:", True, HVIT), (self.sentrere_tekst(FONT2.render("Skyte:", True, HVIT), gyldig = False), 210))
+        self.overflate.blit(FONT2.render("Granater           Skyte", True, HVIT), (self.sentrere_tekst(FONT2.render(f"{granat_tekst:28}", True, HVIT), gyldig = False), 210))
         self.overflate.blit(FONT2.render("Bevegelse:", True, HVIT), (self.sentrere_tekst(FONT2.render("Bevegelse:", True, HVIT), gyldig = False), 310))
             
         self.tegne_taster_startskjerm()
@@ -481,8 +484,8 @@ class Spillbrett:
         self.tegne_info_nede(f"The shooter", 40, font = FONT1)
         self.tegne_info_nede(f"Mål: førstemann til 100 poeng", 80)
 
-        self.tegne_info_nede(f" +1 poeng for å skyte den andre spilleren", 460)
-        self.tegne_info_nede(f" +5 poeng for å plukke opp pengen", 490)
+        self.tegne_info_nede(f"+{POENG_SKUDD} poeng for å skyte den andre spilleren, +{POENG_GRANAT} poeng til den andre spilleren når man treffer granat", 460)
+        self.tegne_info_nede(f"+{POENG_PENGE} poeng for å plukke opp pengen", 490)
         self.tegne_info_nede(f"Hver spillrunde varer i {SPILLRUNDER_TID} sekunder, deretter kan dere kjøpe oppgraderinger", 520)
         self.tegne_info_nede(f"Trykk 'Enter' for å starte", 560)
         
@@ -500,12 +503,10 @@ class Spillbrett:
         self.overflate.blit(FONT1.render(poeng, True, HVIT),
             (BREDDE/2 - FONT1.size(poeng)[0]/2, HØYDE/2 - FONT1.size(vinner)[1]/2 + 100))
         
-    def tegne_taster_startskjerm(self):
-        
+    def tegne_taster_startskjerm(self):    
         def taste_teksten(tast, bokstav):
             self.overflate.blit(FONT1.render(bokstav, True, GRÅ),
             (tast.x + TAST_BREDDE/2 - FONT1.size(bokstav)[0]/2, tast.y + TAST_HØYDE/2 - FONT1.size(bokstav)[1]/2))
-            
             
         def taster_i_listen(i,j,k, y_pos, gyldighet = False):
             tast = Tast_startskjerm(self.sentrere_tekst(FONT1.render("Spiller 1", True, HVIT),
@@ -548,6 +549,8 @@ class Spillbrett:
         
         
     def tegne_pause(self, spiller_1, spiller_2, ammo_1, ammo_2):
+        
+        
         self.overflate.fill(SVART)
         
         pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
@@ -570,6 +573,7 @@ class Spillbrett:
         
         
     def tegne_info_oppe(self, font, tekst, y_pos, gyldig = False, fargen = HVIT):
+        self.sjekke_kryss_ut()
         teksten = font.render(tekst, True, fargen)
         
         if gyldig:
@@ -579,11 +583,14 @@ class Spillbrett:
             
             
     def tegne_info_nede(self, tekst, y_pos, font = FONT2):
+        self.sjekke_kryss_ut()
         teksten = font.render(tekst, True, HVIT)
         self.overflate.blit(teksten, (BREDDE//2 - teksten.get_rect().width//2, y_pos))
         
         
     def tegne_oppgraderinger(self, spiller, priser, spiller_1 = False):
+        
+        
         self.priser_1 = [self.spiller_1.ammo_pris, self.spiller_1.kule_pris, self.spiller_1.kule_fart_pris, self.spiller_1.stjele_pris]
         self.priser_2 = [self.spiller_2.ammo_pris, self.spiller_2.kule_pris, self.spiller_2.kule_fart_pris, self.spiller_2.stjele_pris]
         
@@ -621,6 +628,7 @@ class Spillbrett:
                     self.spiller_2.gyldig_farge = GRØNN
                     
                 if hendelse.type == pg.QUIT:
+                    print("NÅ")
                     if self.spiller_spill == True:
                         self.spiller_spill = False
                         
@@ -655,6 +663,9 @@ class Spillbrett:
                     self.spiller_1.mulige_granater = 3
                     self.spiller_2.mulige_granater = 3
                     
+                    self.spiller_1.granater = []
+                    self.spiller_2.granater = []
+                    
                     self.ikke_tom_ammo = True
     
     
@@ -674,6 +685,7 @@ class Spillbrett:
 
 
     def kjøpe_oppgraderinger(self, spiller, priser, poeng):
+        
         
         if poeng < int(priser[spiller.gyldig]):
             spiller.gyldig_farge = RØD
@@ -725,6 +737,7 @@ class Spillbrett:
     
     
     def oppgraderingstekst(self, tekst, i, spiller_1 = True):
+        self.sjekke_kryss_ut()
         if spiller_1:
             gange = 0
         else:
@@ -734,14 +747,20 @@ class Spillbrett:
             (self.oppgraderings_boks.x + 20 + (400*gange), self.oppgraderings_boks.y + BOKS_HØYDE/2 + (BOKS_HØYDE + BOKS_AVSTAND)*i - 5))
             
                 
-            
     def sentrere_tekst(self, tekst, gyldig = False):
+        self.sjekke_kryss_ut()
         if gyldig:
             tallet = 500
         else:
             tallet = 100
         return BREDDE//2 - tallet + BREDDE/4 - (tekst.get_rect().width//2)
-
+    
+    def sjekke_kryss_ut(self):
+        for hendelse in pg.event.get():
+            print("nå")
+            if hendelse.type == pg.QUIT:
+                self.spiller_spill = False
+                self.kjører = False
 
 spillbrett_objekt = Spillbrett()
 
