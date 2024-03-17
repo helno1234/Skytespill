@@ -285,7 +285,7 @@ class Granat:
                 self.senter = (self.x, self.y)
             
 class Eksplosjon:
-    def __init__(self, x, y, overflate):
+    def __init__(self, x, y, overflate):        
         self.x = x
         self.y = y
         
@@ -299,13 +299,15 @@ class Eksplosjon:
         
         self.indeks = 0
         
-        self.radius_økning = 5
-        
         self.eksplosjon_ferdig = False
         
         self.truffet_spiller = False
         
-        self.rektangel = pg.Rect(self.x, self.y, GRANAT_RADIUS + 2*self.radius_økning, GRANAT_RADIUS + 2*self.radius_økning)
+        self.radius_økning = 5
+        
+        self.bredde = GRANAT_RADIUS + 4*self.radius_økning
+        
+        self.rektangel = pg.Rect(self.x - self.bredde/2, self.y - self.bredde/2, self.bredde, self.bredde)
         
         self.farge = self.bilde_farger[self.indeks]
         
@@ -314,7 +316,7 @@ class Eksplosjon:
         
         self.teller += 1
         
-        if self.teller >= 6:
+        if self.teller >= 5:
             self.teller = 0
             self.indeks += 1
             self.radius += self.radius_økning
@@ -324,10 +326,7 @@ class Eksplosjon:
             
     def kollisjon(self, objekt):
         return self.rektangel.colliderect(objekt.rect)
-        """
-        self.bilde = pg.image.load("eksplosjon.jpeg")
-        self.bilde = pg.transform.scale(self.bilde, (GRANAT_RADIUS, GRANAT_RADIUS))
-        """ 
+
             
             
             

@@ -52,55 +52,14 @@ class Spillbrett:
         pg.mixer.music.load("battle-music.mp3")
         pg.mixer.music.set_volume(0.3)
         pg.mixer.music.play(fade_ms = 10000, loops=10)
-        
-    def ny(self):
-        self.penge_objekt = Penge(self.penge_x, HØYDE-PLATFORM_HØYDE-PENGE_HØYDE)
-        
-        self.kjør()
-        
-    def nye_platformer(self):
-        # Lager en liste til platformene, og legger til bakken
-        self.platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
-
-        # Nye platformer
-        self.platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
-        self.platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
-        
-        # Lager plattformer
-        while len(self.platform_liste) < 7:
-            # Lager ny plattform
-            ny_platform = Platform(
-                random.randint(PLATFORM_BREDDE, BREDDE-PLATFORM_BREDDE),
-                random.randint(150, HØYDE-PLATFORM_HØYDE-50),
-                PLATFORM_BREDDE,
-                PLATFORM_HØYDE
-            )
-            
-            trygt = True
-                
-            # Sjekker om den nye plattformen er på er ovenfor hverandre og om de kolliderer med noen av de gamle
-            for platform in self.platform_liste:
-                # Om de er ovenfor hverandre
-                if ny_platform.rect.x > (platform.rect.x - PLATFORM_BREDDE) and ny_platform.rect.x < (platform.rect.x + PLATFORM_BREDDE):
-                    trygt = False
-                    break
-                # Om de er oppå hverandre
-                if pg.Rect.colliderect(ny_platform.rect, platform.rect):
-                    trygt = False
-                    break
-                
-                
-            if trygt:
-                # Legger platformen til i lista
-                self.platform_liste.append(ny_platform)
-            else:
-                print("Plattformen kolliderte, prøver på nytt") 
-        
     
     def kjør(self):        
         # Ingen har tatt pengen 
         self.penge_tatt = False
+        self.penge_objekt = Penge(self.penge_x, HØYDE-PLATFORM_HØYDE-PENGE_HØYDE)
     
+        self.vente_ammo_ferdig = False
+        
         self.nye_platformer()
         
         
@@ -185,7 +144,8 @@ class Spillbrett:
                         self.kjører = False
                         
                 if self.spiller_1.ammo <= 0 and self.spiller_2.ammo <= 0:
-                    self.ikke_tom_ammo = False
+                    # Venter til siste kule har truffet spiller eller sidene av spillebrettet
+                    self.vente_ammo_ferdig = True
             
             
             if self.kjører:
@@ -201,22 +161,50 @@ class Spillbrett:
                     
             print(ny_tid)
             
-                    
+    def nye_platformer(self):
+        # Lager en liste til platformene, og legger til bakken
+        self.platform_liste = [Platform(0, HØYDE-PLATFORM_HØYDE, BREDDE, PLATFORM_HØYDE)]
+
+        # Nye platformer
+        self.platform_liste.append(Platform(0, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
+        self.platform_liste.append(Platform(BREDDE-PLATFORM_BREDDE, 350, PLATFORM_BREDDE, HØYDE-350-PLATFORM_HØYDE))
+        
+        # Lager plattformer
+        while len(self.platform_liste) < 7:
+            # Lager ny plattform
+            ny_platform = Platform(
+                random.randint(PLATFORM_BREDDE, BREDDE-PLATFORM_BREDDE),
+                random.randint(150, HØYDE-PLATFORM_HØYDE-50),
+                PLATFORM_BREDDE,
+                PLATFORM_HØYDE
+            )
+            
+            trygt = True
+                
+            # Sjekker om den nye plattformen er på er ovenfor hverandre og om de kolliderer med noen av de gamle
+            for platform in self.platform_liste:
+                # Om de er ovenfor hverandre
+                if ny_platform.rect.x > (platform.rect.x - PLATFORM_BREDDE) and ny_platform.rect.x < (platform.rect.x + PLATFORM_BREDDE):
+                    trygt = False
+                    break
+                # Om de er oppå hverandre
+                if pg.Rect.colliderect(ny_platform.rect, platform.rect):
+                    trygt = False
+                    break
+                
+                
+            if trygt:
+                # Legger platformen til i lista
+                self.platform_liste.append(ny_platform)
+            else:
+                print("Plattformen kolliderte, prøver på nytt")
+                
+                
     def hendelser(self):
         # Går gjennom hendelser (events)
         for hendelse in pg.event.get():
                 
             if hendelse.type == pg.KEYDOWN:
-                if hendelse.key == pg.K_q:
-                    if self.spiller_1.mulige_granater > 0:
-                        self.opprett_granat(self.spiller_1, self.spiller_1.retning_venstre)
-                        self.spiller_1.mulige_granater -= 1
-                    
-                if hendelse.key == pg.K_u:
-                    if self.spiller_2.mulige_granater > 0:
-                        self.opprett_granat(self.spiller_2, self.spiller_2.retning_venstre)
-                        self.spiller_2.mulige_granater -= 1
-                
                 # Spiller 1 skal hoppe hvis vi trykker på mellomromstasten
                 if hendelse.key == pg.K_w:
                     # Kan kun hoppe dersom spilleren er nede på bakken
@@ -228,6 +216,17 @@ class Spillbrett:
                     # Kan kun hoppe dersom spilleren er nede på bakken
                     if self.spiller_2.fart[1] == 0:
                         self.spiller_2.hopp()
+                        
+                if hendelse.key == pg.K_q:
+                    if self.spiller_1.mulige_granater > 0:
+                        self.opprett_granat(self.spiller_1, self.spiller_1.retning_venstre)
+                        self.spiller_1.mulige_granater -= 1
+                    
+                if hendelse.key == pg.K_u:
+                    if self.spiller_2.mulige_granater > 0:
+                        self.opprett_granat(self.spiller_2, self.spiller_2.retning_venstre)
+                        self.spiller_2.mulige_granater -= 1
+                
                 
                 if hendelse.key == pg.K_e:
                     # Spiller 1 skyter kule mot venstre
@@ -336,25 +335,35 @@ class Spillbrett:
         oppdatering_av_objektene(self.spiller_1.kule_liste, self.spiller_1, self.spiller_2)
         oppdatering_av_objektene(self.spiller_2.kule_liste, self.spiller_2, self.spiller_1)
         
+        if self.vente_ammo_ferdig and len(self.spiller_1.kule_liste) == 0 and len(self.spiller_2.kule_liste) == 0:
+            self.ikke_tom_ammo = False
+        
         oppdatering_av_objektene(self.spiller_1.granater, self.spiller_1, self.spiller_2, kollisjon = False, eksplosjonen = True)
         oppdatering_av_objektene(self.spiller_2.granater, self.spiller_2, self.spiller_1, kollisjon = False, eksplosjonen = True)
         
+        def spiller_eksplosjon(spiller):
+            if spiller.rect.x + SPILLER_BREDDE/2 < eksplosjon.x:
+                spiller.fart[0] -= 10
+            if spiller.rect.x > eksplosjon.x:
+                spiller.fart[0] += 10
 
         for spiller in self.spillere:
             for eksplosjon in spiller.eksplosjoner:
                 eksplosjon.oppdater()
                 if not eksplosjon.truffet_spiller:
                     if eksplosjon.kollisjon(self.spiller_1):
-                            self.poeng_2 += 5
+                        spiller_eksplosjon(self.spiller_1)
+                        self.poeng_2 += 5
+                        
                     if eksplosjon.kollisjon(self.spiller_2):
-                            self.poeng_1 += 5
+                        spiller_eksplosjon(self.spiller_2)
+                        self.poeng_1 += 5
                         
                     eksplosjon.truffet_spiller = True
                         
                 if eksplosjon.eksplosjon_ferdig:
                     spiller.eksplosjoner.remove(eksplosjon)
 
-                
         # Sjekker om spillerne faller
         for spiller in self.spillere:
             if spiller.fart[1] > 0:
@@ -363,13 +372,20 @@ class Spillbrett:
                 # Sjekker om spilleren kolliderer med en plattform
                 for p in self.platform_liste:
                     if pg.Rect.colliderect(spiller.rect, p.rect):
-                        kollisjon_spiller_platform = True
-                        break
+                        # Sjekker om spilleren er på toppen av plattformen
+                        if spiller.rect.bottom <= p.rect.top + SPILLER_HØYDE/2:
+                            kollisjon_spiller_platform = True
+                            break
                 
                 if kollisjon_spiller_platform:
                     spiller.pos[1] = p.rect.y - SPILLER_HØYDE
                     spiller.fart[1] = 0
-            
+                        
+                    if spiller.rect.x + SPILLER_BREDDE <= p.rect.x or spiller.rect.x >= p.rect.x + PLATFORM_BREDDE:
+                        if spiller.rect.y > HØYDE - PLATFORM_HØYDE:
+                            spiller.pos[0] = 0
+                    
+                        
             # Går ikke gjennom de store platformene på siden
             if spiller.pos[0] < PLATFORM_BREDDE or spiller.pos[0] > BREDDE - PLATFORM_BREDDE - SPILLER_BREDDE:
                 if spiller.pos[1] > 350:
@@ -398,11 +414,12 @@ class Spillbrett:
                     radius = GRANAT_RADIUS
                     
                 pg.draw.circle(self.overflate, farge, objekt.senter, radius)
-        
+                
         for spiller in self.spillere:
+            
             # Tegner spilleren
             self.overflate.blit(spiller.bilde, spiller.pos)
-
+            
             tegne_sirklene(spiller.kule_liste, SVART, i = 1)
             tegne_sirklene(spiller.granater, MØRKE_RØD)
             tegne_sirklene(spiller.eksplosjoner, RØD, i = 1, j = 1)
@@ -417,6 +434,9 @@ class Spillbrett:
         pg.draw.rect(self.overflate, RØD, (self.spiller_1.rect), 2)
         # rect.
         pg.draw.rect(self.overflate, GRØNN, (self.spiller_2.rect), 2)
+        
+        for eksplosjon in self.spiller_1.eksplosjoner:
+            pg.draw.rect(self.overflate, HVIT, eksplosjon.rektangel, 2)
         
         # Tegner penge_objektet:
         if not self.penge_tatt:
@@ -727,6 +747,6 @@ spillbrett_objekt = Spillbrett()
 
 while spillbrett_objekt.kjører:
     
-    spillbrett_objekt.ny()
+    spillbrett_objekt.kjør()
 
 pg.quit()
