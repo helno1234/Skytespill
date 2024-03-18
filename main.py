@@ -432,7 +432,8 @@ class Spillbrett:
             
         for i in range(self.spiller_1.mulige_granater):
             pg.draw.circle(self.overflate, MØRKE_RØD, (60 + 40*i, 80), GRANAT_RADIUS)
-            
+        
+        """
         # Tegner rektangelet rundt spiller 1
         pg.draw.rect(self.overflate, RØD, (self.spiller_1.rect), 2)
         # rect.
@@ -440,7 +441,7 @@ class Spillbrett:
         
         for eksplosjon in self.spiller_1.eksplosjoner:
             pg.draw.rect(self.overflate, HVIT, eksplosjon.rektangel, 2)
-        
+        """
         # Tegner penge_objektet:
         if not self.penge_tatt:
             self.overflate.blit(self.penge_objekt.bilde, (self.penge_objekt.rect.x, self.penge_objekt.rect.y))
@@ -458,9 +459,13 @@ class Spillbrett:
         self.overflate.blit(spiller.bilde_logo, (x_bilde, 10))
         self.overflate.blit(FONT2.render(f"Poeng: {poeng}", True, HVIT),
             (50 * i + (BREDDE - 50 - FONT2.size(f"Poeng: {poeng}")[0]) * j, 12))
+        
+        self.overflate.blit(self.penge_objekt.bilde_logo,
+            (135 * i + (BREDDE - 70 - FONT2.size(f"Poeng: {poeng}")[0]) * j, 12))
+        
         self.overflate.blit(FONT2.render(f"Ammunisjon: {ammo}", True, HVIT),
             (50 * i + (BREDDE - 50 - FONT2.size(f"Ammunisjon: {ammo}")[0]) * j, 42))
-        
+    
     
     def startskjerm(self):
         self.overflate.fill(SVART) 
@@ -563,6 +568,7 @@ class Spillbrett:
         self.tegne_info_oppe(FONT1, f"{spiller_2}", 50, fargen = GRØNN)
         self.tegne_info_oppe(FONT2, f"Antall poeng: {self.poeng_1}", 100, gyldig = True)
         self.tegne_info_oppe(FONT2, f"Antall poeng: {self.poeng_2}", 100)
+    
         self.tegne_info_oppe(FONT2, f"Ammo igjen: {ammo_1}", 125, gyldig = True)
         self.tegne_info_oppe(FONT2, f"Ammo igjen: {ammo_2}", 125)
         
@@ -674,6 +680,7 @@ class Spillbrett:
                     
                 if hendelse.key == pg.K_i:
                     self.kjøpe_oppgraderinger(self.spiller_2, self.priser_2, self.poeng_2)
+            
         
         # Liste med oppgraderingstekster
         oppgraderingstekster = ["+ 10 ammo", "Større kule", "Øke skuddfart", "Ta poeng"]
@@ -682,8 +689,42 @@ class Spillbrett:
         for i in range(4):
             self.oppgraderingstekst(oppgraderingstekster[i], i)
             self.oppgraderingstekst(oppgraderingstekster[i], i, spiller_1 = False)
-
-
+            
+        def penge_objekt_plassering(x, y):
+            self.overflate.blit(self.penge_objekt.bilde_logo,
+                (self.sentrere_tekst(FONT2.render(f"Antall poeng: {self.poeng_1}", True, HVIT), gyldig = True) + x, y))
+            pg.draw.rect(self.overflate, SVART, (self.sentrere_tekst(FONT2.render(f"Antall poeng: {self.poeng_1}", True, HVIT), gyldig = True) + x, y, PENGE_BREDDE/2, PENGE_HØYDE/2), 1)
+            
+        
+        def penge_priser(prisliste, x_1, x_2):
+            teller = 0
+            
+            for pris in prisliste:
+                k = 0
+                    # Sjekker om det har en pris på 1 siffer, eller 2
+                if int(pris) < 10:
+                    x_verdi = x_1
+                else:
+                    x_verdi = x_2
+                    k = 1
+                # penge_objekt_plassering(x_verdi - 335 - k, 220 + teller_1*60)
+                pg.draw.rect(self.overflate, GUL, (x_verdi, 220 + teller*60, PENGE_BREDDE/2, PENGE_HØYDE/2))
+                pg.draw.rect(self.overflate, SVART, (x_verdi, 220 + teller*60, PENGE_BREDDE/2, PENGE_HØYDE/2), 1)
+                
+                teller += 1
+                
+        priser_1 = [self.spiller_1.ammo_pris, self.spiller_1.kule_pris, self.spiller_1.kule_fart_pris, self.spiller_1.stjele_pris]
+        priser_2 = [self.spiller_2.ammo_pris, self.spiller_2.kule_pris, self.spiller_2.kule_fart_pris, self.spiller_2.stjele_pris]
+            
+        # Pengeobjektet på toppen
+        penge_objekt_plassering(145, 100)
+        penge_objekt_plassering(545, 100)
+        
+        # Lage pengeobjektene til oppgraderingene
+        penge_priser(priser_1, 470, 480)
+        penge_priser(priser_2, 870, 880)
+                
+        
     def kjøpe_oppgraderinger(self, spiller, priser, poeng):
         
         

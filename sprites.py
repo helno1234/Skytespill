@@ -82,12 +82,28 @@ class Spiller:
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
         
+        """
+        # Animasjon til spiller
+        self.gjeldende_bilde += 1
+        
+        if self.gjeldende_bilde > 1:
+            self.gjeldende_bilde = 0
+            
+        self.bilde = self.bilder[int(self.gjeldende_bilde)]
+        """
 
 # Klasse for spillobjekt som bruker piltaster
 class SpillerH(Spiller):
     def __init__(self):
         super().__init__()
-        self.bilde = pg.transform.scale(pg.image.load("luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        """
+        self.bilder = [pg.transform.scale(pg.image.load("luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE)), pg.transform.scale(pg.image.load("luigi.png"), (SPILLER_BREDDE - 10, SPILLER_HØYDE - 10))]
+        self.gjeldende_bilde = 0
+        
+        self.bilde = self.bilder[self.gjeldende_bilde]
+        """
+        self.bilde = pg.transform.scale(pg.image.load("Luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        
         self.rect = self.bilde.get_rect()
     
         self.rect.center = (
@@ -119,6 +135,11 @@ class SpillerV(Spiller):
     def __init__(self):
         super().__init__()
         self.bilde = pg.transform.scale(pg.image.load("mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        """
+        self.bilder = [pg.transform.scale(pg.image.load("luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE)), pg.transform.scale(pg.image.load("mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))]
+        self.gjeldende_bilde = 0
+        self.bilde = self.bilder[self.gjeldende_bilde]
+        """
         self.rect = self.bilde.get_rect()
         self.rect.center = (
             10, 0
@@ -208,8 +229,9 @@ class Oppgraderings_boks:
 class Penge:
     def __init__(self, x, y):
         self.bilde = pg.Surface((PENGE_BREDDE, PENGE_HØYDE))
+        self.bilde_logo = pg.Surface((PENGE_BREDDE/2, PENGE_HØYDE/2))
         self.bilde.fill(GUL)
-    
+        self.bilde_logo.fill(GUL)
         self.rect = self.bilde.get_rect()
         self.rect.center = (
             BREDDE/2 + PENGE_BREDDE, HØYDE - PLATFORM_HØYDE
@@ -230,7 +252,7 @@ class Granat:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.fart = [7,-11]
+        self.fart = [5,-7]
       
         self.skutt = False
         
@@ -252,14 +274,23 @@ class Granat:
     def oppdater_rektangel(self):
          return pg.Rect(self.x, self.y, GRANAT_RADIUS, GRANAT_RADIUS)
 
+    def truffet_platform(self, y):
+        self.truffet_bakken = True
+        self.start_tiden = time.time()
+        self.y = y
+        
+        self.senter = (self.x, self.y)
+    
     def oppdater(self):
-        if self.skutt:
-            if self.y >= HØYDE - PLATFORM_HØYDE - GRANAT_RADIUS and not self.truffet_bakken:
-                self.truffet_bakken = True
-                self.start_tiden = time.time()
-                self.y = HØYDE - PLATFORM_HØYDE - GRANAT_RADIUS
+        if self.skutt: 
+            if self.x <= PLATFORM_BREDDE and self.y >= STOR_PLATFORM_FRA_TAK and not self.truffet_bakken:
+                self.truffet_platform(STOR_PLATFORM_FRA_TAK)
                 
-                self.senter = (self.x, self.y)
+            elif self.x >= BREDDE - PLATFORM_BREDDE and self.y >= STOR_PLATFORM_FRA_TAK and not self.truffet_bakken:
+                self.truffet_platform(STOR_PLATFORM_FRA_TAK)
+                
+            elif self.y >= HØYDE - PLATFORM_HØYDE - GRANAT_RADIUS and not self.truffet_bakken:
+                self.truffet_platform(HØYDE - PLATFORM_HØYDE - GRANAT_RADIUS)
                 
             elif self.truffet_bakken:
                 self.ny_tid = time.time()
@@ -268,14 +299,23 @@ class Granat:
                     eksplosjon_lyd.set_volume(0.5)
                     eksplosjon_lyd.play()
                     self.eksplosjon = True
+            
             else:
+                granat_går = True
+                
                 if self.y >= STOR_PLATFORM_FRA_TAK and self.x <= PLATFORM_BREDDE:
                     self.fart[0] = 0
+                    granat_går = False
                 
                 if self.y >= STOR_PLATFORM_FRA_TAK and self.x >= BREDDE - PLATFORM_BREDDE:
                     self.fart[0] = 0
+                    granat_går = False
+                
+                if self.x <= 0 or self.x >= BREDDE:
+                    self.fart[0] = 0
+                    granat_går = False
                     
-                else:
+                if granat_går:
                     if self.venstre:
                         self.x -= self.fart[0]
                     else:
@@ -323,7 +363,7 @@ class Eksplosjon:
         
         self.teller += 1
         
-        if self.teller >= 5:
+        if self.teller >= 6:
             self.teller = 0
             self.indeks += 1
             self.radius += self.radius_økning
