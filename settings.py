@@ -46,7 +46,7 @@ PENGE_BREDDE = 30
 PENGE_HØYDE = 30
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 1
+SPILLRUNDER_TID = 60
 
 # Bredde og høyde for taster (startskjerm)
 TAST_BREDDE = 40

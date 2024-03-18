@@ -19,22 +19,16 @@ class Spillbrett:
         
         self.start_tid = time.time()
         
-        self.spiller_spill = True
-        
-        self.gyldig_startskjerm = True
-        
         # Poeng til spiller_1 og spiller_2
         self.poeng_1 = 20
         self.poeng_2 = 20
-        
-        self.ikke_tom_ammo = True
         
         self.oppgraderings_boks = Oppgraderings_boks()
         
         # Lager spiller-objekt
         self.spiller_2 = SpillerH()
         self.spiller_1 = SpillerV()
-        
+
         self.priser_1 = [self.spiller_1.ammo_pris, self.spiller_1.kule_pris, self.spiller_1.kule_fart_pris, self.spiller_1.stjele_pris]
         self.priser_2 = [self.spiller_2.ammo_pris, self.spiller_2.kule_pris, self.spiller_2.kule_fart_pris, self.spiller_2.stjele_pris]
         
@@ -47,6 +41,11 @@ class Spillbrett:
             }
 
         self.penge_x = random.randint(PLATFORM_BREDDE + 50, BREDDE-PLATFORM_BREDDE - 50)
+        
+        # Startvariabler
+        self.spiller_spill = True
+        self.gyldig_startskjerm = True
+        self.ikke_tom_ammo = True
         self.granat = False
         
         pg.mixer.music.load("battle-music.mp3")
@@ -60,9 +59,10 @@ class Spillbrett:
     
         self.vente_ammo_ferdig = False
         
+        # For hver nye runde - nye platformer
         self.nye_platformer()
         
-        
+        # Her er startskjermen
         while self.gyldig_startskjerm:
             for hendelse in pg.event.get():
                 if hendelse.type == pg.QUIT:
@@ -73,8 +73,7 @@ class Spillbrett:
                     if hendelse.key == pg.K_RETURN:
                         self.gyldig_startskjerm = False
                         self.start_tid = time.time()
-    
-            
+                        
                 self.startskjerm()
                 pg.display.flip()
 
@@ -82,14 +81,12 @@ class Spillbrett:
         ny_tid = time.time()
         
         if self.spiller_spill:
-            
             # Når spillerunden er ferdig
             while ny_tid - self.start_tid >= SPILLRUNDER_TID or not self.ikke_tom_ammo and self.spiller_spill:
                 # Setter ned volum på bakgrunnsmusikken
                 pg.mixer.music.set_volume(0.2)
-                
                 self.tegne_pause("Spiller 1", "Spiller 2", self.spiller_1.ammo, self.spiller_2.ammo)
-                
+
                 # Lager lister med 4 oppgraderingsbokser til hver spiller
                 for i in range(4):
                     self.spiller_1.oppgraderingsliste.append([self.oppgraderings_boks.x,
@@ -101,35 +98,28 @@ class Spillbrett:
         
                 self.tegne_oppgraderinger(self.spiller_1, self.priser_1, spiller_1 = True)
                 self.tegne_oppgraderinger(self.spiller_2, self.priser_2)
-                
-                self.sjekke_kryss_ut()
-                
-                pg.display.flip()
             
+                self.sjekke_kryss_ut()
+                pg.display.flip()
             
             # I spillet, dersom spillrunden ikke er ferdig
             while ny_tid - self.start_tid < SPILLRUNDER_TID and self.spiller_spill and self.ikke_tom_ammo:
-                
                 ny_tid = time.time()
                 
+                def avslutningen(vinner, poeng, farge):
+                    self.spiller_spill = False
+                    self.vinner = vinner
+                    self.vinner_poeng = f"Med {poeng} poeng!"
+                    self.vinner_farge = farge
+                
                 if self.poeng_1 >= 50:
-                    self.spiller_spill = False
-                    self.vinner = "Spiller 1"
-                    self.vinner_poeng = f"Med {self.poeng_1} poeng!"
-                    self.vinner_farge = RØD
+                    avslutningen("Spiller 1", self.poeng_1, RØD)
                 elif self.poeng_2 >= 50:
-                    self.vinner = "Spiller 2"
-                    self.vinner_poeng = f"Med {self.poeng_2} poeng!"
-                    self.vinner_farge = GRØNN
-                    self.spiller_spill = False
+                    avslutningen("Spiller 2", self.poeng_2, GRØNN)
                     
-                #if self.granat:
-                    #granat = Granat(self.spiller_1.rect.x, self.spiller_1.rect.y, -1)
-                    #self.spiller_1.granater.append(granat)
                 pg.mixer.music.set_volume(1.0)
                     
                 self.klokke.tick(FPS)
-                
                 self.hendelser()
                 self.oppdater()
                 self.tegne()
@@ -149,7 +139,6 @@ class Spillbrett:
                     # Venter til siste kule har truffet spiller eller sidene av spillebrettet
                     self.vente_ammo_ferdig = True
             
-            
             if self.kjører:
                 # Ferdig med å spille: avslutningsskjerm
                 while not self.spiller_spill:
@@ -160,8 +149,6 @@ class Spillbrett:
                             self.spiller_spill = True
                             self.kjører = False
                     pg.display.flip()
-                    
-            print(ny_tid)
             
     def nye_platformer(self):
         # Lager en liste til platformene, og legger til bakken
@@ -180,7 +167,6 @@ class Spillbrett:
                 PLATFORM_BREDDE,
                 PLATFORM_HØYDE
             )
-            
             trygt = True
                 
             # Sjekker om den nye plattformen er på er ovenfor hverandre og om de kolliderer med noen av de gamle
@@ -192,15 +178,11 @@ class Spillbrett:
                 # Om de er oppå hverandre
                 if pg.Rect.colliderect(ny_platform.rect, platform.rect):
                     trygt = False
-                    break
-                
+                    break     
                 
             if trygt:
                 # Legger platformen til i lista
-                self.platform_liste.append(ny_platform)
-            else:
-                print("Plattformen kolliderte, prøver på nytt")
-                
+                self.platform_liste.append(ny_platform)     
                 
     def hendelser(self):
         # Går gjennom hendelser (events)
@@ -229,7 +211,6 @@ class Spillbrett:
                         self.opprett_granat(self.spiller_2, self.spiller_2.retning_venstre)
                         self.spiller_2.mulige_granater -= 1
                 
-                
                 if hendelse.key == pg.K_e:
                     # Spiller 1 skyter kule mot venstre
                     if self.spiller_1.ammo > 0:
@@ -240,7 +221,6 @@ class Spillbrett:
                         
                         self.opprett_kule(self.spiller_1, self.spiller_1.kule_radius, self.spiller_1.retning_venstre, i)
                         self.spiller_1.ammo -= 1
-                
                 
                 if hendelse.key == pg.K_o:
                     # Spiller 2 skyter kule mot venstre
@@ -255,13 +235,8 @@ class Spillbrett:
            
     def opprett_granat(self, spiller, retning_venstre):
         ny_granat = Granat(spiller.rect.x + (1/2)*SPILLER_BREDDE, spiller.rect.y)
-        ny_granat.skutt = True
-        if not retning_venstre:
-            ny_granat.venstre = False
-        # Legger til granat i spilleren sin liste
-        spiller.granater.append(ny_granat)
+        self.oppretting_skudd_objekt(spiller.granater, ny_granat, retning_venstre)
         self.granat = spiller.granater[-1]
-
              
     def opprett_kule(self, spiller, radius, retning_venstre, i = 0):
         # Lager skudd-lyd når det blir skutt en kule
@@ -270,13 +245,15 @@ class Spillbrett:
         skudd_lyd.play()
         
         ny_kule = Kule(spiller.rect.x + (SPILLER_BREDDE)*i, spiller.rect.y + SPILLER_HØYDE//2, radius, spiller.kule_fart)
-        ny_kule.skutt = True
-        if not retning_venstre:
-            ny_kule.venstre = False
-        # Legger til kule i spilleren sin liste
-        spiller.kule_liste.append(ny_kule)
+        self.oppretting_skudd_objekt(spiller.kule_liste, ny_kule, retning_venstre)
         self.kule = spiller.kule_liste[-1]
-        
+    
+    def oppretting_skudd_objekt(self, liste, nytt_objekt, retning_venstre):
+        nytt_objekt.skutt = True
+        if not retning_venstre:
+            nytt_objekt.venstre = False
+        # Legger til kule i spilleren sin liste
+        liste.append(nytt_objekt)
         
     def oppdater(self):
         self.spiller_1.oppdater()
@@ -292,7 +269,7 @@ class Spillbrett:
         # Sjekker om spillerne kolliderer
         if self.spiller_1.rect.colliderect(self.spiller_2.rect):
             if self.spiller_1.rect.x > self.spiller_2.rect.x - SPILLER_BREDDE or self.spiller_1.rect.x < self.spiller_2.rect.x + SPILLER_BREDDE:
-                # Hvis de kolliderer, får de en motsatt x-fart
+                # Hvis de kolliderer, går de fra hverandre
                 self.spiller_1.fart[0] = -self.spiller_1.fart[0]*2
                 self.spiller_2.fart[0] = -self.spiller_2.fart[0]*2
         
@@ -305,6 +282,7 @@ class Spillbrett:
                     skudd_lyd.set_volume(0.7)
                     skudd_lyd.play()
                     
+                    # Sjekker hvem som skal få poeng
                     if self.spiller_poeng_ordbok[spiller] == 1:
                         self.poeng_1 += POENG_PENGE
                     else:
@@ -328,15 +306,14 @@ class Spillbrett:
                     if objekt.eksplosjon:
                         spiller.eksplosjoner.append(Eksplosjon(objekt.senter[0], objekt.senter[1], self.overflate))
                         liste.remove(objekt)
-                
-
+            
                 if objekt.senter[0] <= 0 or objekt.senter[0] >= BREDDE:
                     liste.remove(objekt)
-               
         
         oppdatering_av_objektene(self.spiller_1.kule_liste, self.spiller_1, self.spiller_2)
         oppdatering_av_objektene(self.spiller_2.kule_liste, self.spiller_2, self.spiller_1)
         
+        # Hvis man venter på at den siste kulen skal treffe hindring
         if self.vente_ammo_ferdig and len(self.spiller_1.kule_liste) == 0 and len(self.spiller_2.kule_liste) == 0:
             self.ikke_tom_ammo = False
         
@@ -348,7 +325,8 @@ class Spillbrett:
                 spiller.fart[0] -= 10
             if spiller.rect.x > eksplosjon.x:
                 spiller.fart[0] += 10
-
+        
+        # Oppdaterer eksplosjoner
         for spiller in self.spillere:
             for eksplosjon in spiller.eksplosjoner:
                 eksplosjon.oppdater()
@@ -365,7 +343,6 @@ class Spillbrett:
                         
                 if eksplosjon.eksplosjon_ferdig:
                     spiller.eksplosjoner.remove(eksplosjon)
-        
         
         # Sjekker om spillerne faller
         for spiller in self.spillere:
@@ -388,12 +365,10 @@ class Spillbrett:
                         if spiller.rect.y > HØYDE - PLATFORM_HØYDE:
                             spiller.pos[0] = 0
                     
-                        
             # Går ikke gjennom de store platformene på siden
             if spiller.pos[0] < PLATFORM_BREDDE or spiller.pos[0] > BREDDE - PLATFORM_BREDDE - SPILLER_BREDDE:
                 if spiller.pos[1] > STOR_PLATFORM_FRA_TAK:
-                    spiller.fart[0] = -spiller.fart[0]*1.5
-                    
+                    spiller.fart[0] = -spiller.fart[0]*1.5        
         
     def tegne(self):     
         himmel = pg.Surface((BREDDE, HØYDE))
@@ -418,8 +393,7 @@ class Spillbrett:
                     
                 pg.draw.circle(self.overflate, farge, objekt.senter, radius)
                 
-        for spiller in self.spillere:
-            
+        for spiller in self.spillere: 
             # Tegner spilleren
             self.overflate.blit(spiller.bilde, spiller.pos)
             
@@ -432,28 +406,17 @@ class Spillbrett:
             
         for i in range(self.spiller_1.mulige_granater):
             pg.draw.circle(self.overflate, MØRKE_RØD, (60 + 40*i, 80), GRANAT_RADIUS)
-        
-        """
-        # Tegner rektangelet rundt spiller 1
-        pg.draw.rect(self.overflate, RØD, (self.spiller_1.rect), 2)
-        # rect.
-        pg.draw.rect(self.overflate, GRØNN, (self.spiller_2.rect), 2)
-        
-        for eksplosjon in self.spiller_1.eksplosjoner:
-            pg.draw.rect(self.overflate, HVIT, eksplosjon.rektangel, 2)
-        """
+
         # Tegner penge_objektet:
         if not self.penge_tatt:
             self.overflate.blit(self.penge_objekt.bilde, (self.penge_objekt.rect.x, self.penge_objekt.rect.y))
-            
-            
+               
         # Tegner poeng og ammo øverst i hjørnet, slik at de som spiller kan se det samtidig
         self.hjørne_informasjon(self.spiller_1, 10, self.poeng_1, self.spiller_1.ammo, i = 1, j = 0)
         self.hjørne_informasjon(self.spiller_2, BREDDE - 40, self.poeng_2, self.spiller_2.ammo)
 
         # "Flipper" displayet for å vise hva vi har tegnet
-        pg.display.flip()
-        
+        pg.display.flip()  
         
     def hjørne_informasjon(self, spiller, x_bilde, poeng, ammo, i = 0, j = 1):
         self.overflate.blit(spiller.bilde_logo, (x_bilde, 10))
@@ -465,7 +428,6 @@ class Spillbrett:
         
         self.overflate.blit(FONT2.render(f"Ammunisjon: {ammo}", True, HVIT),
             (50 * i + (BREDDE - 50 - FONT2.size(f"Ammunisjon: {ammo}")[0]) * j, 42))
-    
     
     def startskjerm(self):
         self.overflate.fill(SVART) 
@@ -494,7 +456,6 @@ class Spillbrett:
         self.tegne_info_nede(f"Hver spillrunde varer i {SPILLRUNDER_TID} sekunder, deretter kan dere kjøpe oppgraderinger", 520)
         self.tegne_info_nede(f"Trykk 'Enter' for å starte", 560)
         
-        
     def avslutningsskjerm(self, vinner, poeng, farge):
         self.overflate.fill(SVART)
         pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
@@ -518,7 +479,7 @@ class Spillbrett:
                                                         gyldig=gyldighet) + FONT1.size("Spiller 1")[0]/2 + i * (TAST_BREDDE * (1/2 + j) + TAST_AVSTAND * k),
                                                         y_pos)
             taster.append(tast)
-        
+            
         taster = []
         bokstaver = ["q", "u", "e", "o", "w", "i", "s", "k", "d", "l", "a", "j"]
     
@@ -552,10 +513,7 @@ class Spillbrett:
             pg.draw.rect(self.overflate, LYSE_GRÅ, (taster[i].x, taster[i].y, taster[i].bredde, taster[i].høyde), 0, 4)
             taste_teksten(taster[i], bokstaver[i])
         
-        
     def tegne_pause(self, spiller_1, spiller_2, ammo_1, ammo_2):
-        
-        
         self.overflate.fill(SVART)
         
         pg.draw.rect(self.overflate, GRÅ, [200, 20, BREDDE-400, HØYDE-40])
@@ -577,7 +535,6 @@ class Spillbrett:
         self.tegne_info_nede("Spiller 1 kan trykke 's', og spiller 2 kan trykke 'k' til å gå gjennom oppgraderingene.", 525)
         self.tegne_info_nede("Spiller 1 betaler ved å trykke 'w', og spiller 2 bruker 'i' til å betale.", 550)
         
-        
     def tegne_info_oppe(self, font, tekst, y_pos, gyldig = False, fargen = HVIT):
         self.sjekke_kryss_ut()
         teksten = font.render(tekst, True, fargen)
@@ -586,22 +543,17 @@ class Spillbrett:
             self.overflate.blit(teksten, (self.sentrere_tekst(teksten, gyldig = True), y_pos))
         else:
             self.overflate.blit(teksten, (self.sentrere_tekst(teksten), y_pos))
-            
-            
+                
     def tegne_info_nede(self, tekst, y_pos, font = FONT2):
         self.sjekke_kryss_ut()
         teksten = font.render(tekst, True, HVIT)
         self.overflate.blit(teksten, (BREDDE//2 - teksten.get_rect().width//2, y_pos))
-        
-        
-    def tegne_oppgraderinger(self, spiller, priser, spiller_1 = False):
-        
-        
+            
+    def tegne_oppgraderinger(self, spiller, priser, spiller_1 = False):        
         self.priser_1 = [self.spiller_1.ammo_pris, self.spiller_1.kule_pris, self.spiller_1.kule_fart_pris, self.spiller_1.stjele_pris]
         self.priser_2 = [self.spiller_2.ammo_pris, self.spiller_2.kule_pris, self.spiller_2.kule_fart_pris, self.spiller_2.stjele_pris]
         
         for oppgradering in spiller.oppgraderingsliste:
-            
             # Sjekker at variabel er mindre enn lengden på listene
             if spiller.gyldig < 4:         
                 if oppgradering == spiller.oppgraderingsliste[spiller.gyldig]:
@@ -611,7 +563,6 @@ class Spillbrett:
                 
             else:
                 spiller.gyldig = 0
-            
             
             if spiller_1:
                 ganging = 0
@@ -634,7 +585,6 @@ class Spillbrett:
                     self.spiller_2.gyldig_farge = GRØNN
                     
                 if hendelse.type == pg.QUIT:
-                    print("NÅ")
                     if self.spiller_spill == True:
                         self.spiller_spill = False
                         
@@ -674,13 +624,11 @@ class Spillbrett:
                     
                     self.ikke_tom_ammo = True
     
-    
                 if hendelse.key == pg.K_w:
                     self.kjøpe_oppgraderinger(self.spiller_1, self.priser_1, self.poeng_1)
                     
                 if hendelse.key == pg.K_i:
                     self.kjøpe_oppgraderinger(self.spiller_2, self.priser_2, self.poeng_2)
-            
         
         # Liste med oppgraderingstekster
         oppgraderingstekster = ["+ 10 ammo", "Større kule", "Øke skuddfart", "Ta poeng"]
@@ -693,8 +641,6 @@ class Spillbrett:
         def penge_objekt_plassering(x, y):
             self.overflate.blit(self.penge_objekt.bilde_logo,
                 (self.sentrere_tekst(FONT2.render(f"Antall poeng: {self.poeng_1}", True, HVIT), gyldig = True) + x, y))
-            pg.draw.rect(self.overflate, SVART, (self.sentrere_tekst(FONT2.render(f"Antall poeng: {self.poeng_1}", True, HVIT), gyldig = True) + x, y, PENGE_BREDDE/2, PENGE_HØYDE/2), 1)
-            
         
         def penge_priser(prisliste, x_1, x_2):
             teller = 0
@@ -713,21 +659,15 @@ class Spillbrett:
                 
                 teller += 1
                 
-        priser_1 = [self.spiller_1.ammo_pris, self.spiller_1.kule_pris, self.spiller_1.kule_fart_pris, self.spiller_1.stjele_pris]
-        priser_2 = [self.spiller_2.ammo_pris, self.spiller_2.kule_pris, self.spiller_2.kule_fart_pris, self.spiller_2.stjele_pris]
-            
         # Pengeobjektet på toppen
         penge_objekt_plassering(145, 100)
         penge_objekt_plassering(545, 100)
         
         # Lage pengeobjektene til oppgraderingene
-        penge_priser(priser_1, 470, 480)
-        penge_priser(priser_2, 870, 880)
+        penge_priser(self.priser_1, 470, 480)
+        penge_priser(self.priser_2, 870, 880)
                 
-        
-    def kjøpe_oppgraderinger(self, spiller, priser, poeng):
-        
-        
+    def kjøpe_oppgraderinger(self, spiller, priser, poeng):        
         if poeng < int(priser[spiller.gyldig]):
             spiller.gyldig_farge = RØD
         else:
@@ -738,9 +678,7 @@ class Spillbrett:
             gyldig_betaling = True
             if spiller.gyldig == 0:
                 spiller.ammo += 10
-                print(spiller.ammo_pris)
                 spiller.ammo_pris = str(int(spiller.ammo_pris)*2)
-                print(spiller.ammo_pris)
                             
             if spiller.gyldig == 1:
                 spiller.kule_radius += 1
@@ -748,12 +686,9 @@ class Spillbrett:
                 
             if spiller.gyldig == 2:
                 spiller.kule_fart += 3
-                print(spiller.kule_fart_pris)
                 spiller.kule_fart_pris = str(int(spiller.kule_fart_pris)*2)
-                print(spiller.kule_fart_pris)
                
             if spiller.gyldig == 3:
-                print(self.spiller_poeng_ordbok[spiller])
                 if self.spiller_poeng_ordbok[spiller] == 1:
                     if self.poeng_2 > 1:
                         self.poeng_2 = self.poeng_2//2
@@ -776,7 +711,6 @@ class Spillbrett:
             else:
                 spiller.gyldig_farge = RØD
     
-    
     def oppgraderingstekst(self, tekst, i, spiller_1 = True):
         self.sjekke_kryss_ut()
         if spiller_1:
@@ -785,8 +719,7 @@ class Spillbrett:
             gange = 1
         
         self.overflate.blit(FONT2.render(tekst, True, HVIT),
-            (self.oppgraderings_boks.x + 20 + (400*gange), self.oppgraderings_boks.y + BOKS_HØYDE/2 + (BOKS_HØYDE + BOKS_AVSTAND)*i - 5))
-            
+            (self.oppgraderings_boks.x + 20 + (400*gange), self.oppgraderings_boks.y + BOKS_HØYDE/2 + (BOKS_HØYDE + BOKS_AVSTAND)*i - 5))     
                 
     def sentrere_tekst(self, tekst, gyldig = False):
         self.sjekke_kryss_ut()
@@ -798,7 +731,6 @@ class Spillbrett:
     
     def sjekke_kryss_ut(self):
         for hendelse in pg.event.get():
-            print("nå")
             if hendelse.type == pg.QUIT:
                 self.spiller_spill = False
                 self.kjører = False
