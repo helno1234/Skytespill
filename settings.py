@@ -66,3 +66,5 @@ FONT1 = pg.font.Font(None, 36)
 FONT2 = pg.font.Font(None, 24)
 STOR_FONT = pg.font.Font(None, 100)
 LITT_STOR_FONT = pg.font.Font(None, 70)
+
+MÅL_POENG = 50

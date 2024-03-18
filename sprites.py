@@ -29,7 +29,10 @@ class Spiller:
         self.kule_fart = 7
     
         # Tom lister
-        h
+        self.oppgraderingsliste = []
+        self.granater = []
+        self.eksplosjoner = []
+        self.kule_liste = []
         
         # Hvilken oppgradering som er "gyldig"
         self.gyldig = 0
@@ -142,7 +145,7 @@ class Platform:
         self.rect.y = y
         
 class Kule:
-    def __init__(self, x:int, y:i , r:float, fart:int):
+    def __init__(self, x:float, y:float, r:float, fart:int):
         self.x = x
         self.y = y
         self.farten = fart
@@ -287,7 +290,7 @@ class Granat:
                 self.senter = (self.x, self.y)
             
 class Eksplosjon:
-    def __init__(self, x, y, overflate):        
+    def __init__(self, x:int, y:int):        
         self.x = x
         self.y = y
         

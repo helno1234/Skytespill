@@ -112,9 +112,9 @@ class Spillbrett:
                     self.vinner_poeng = f"Med {poeng} poeng!"
                     self.vinner_farge = farge
                 
-                if self.poeng_1 >= 50:
+                if self.poeng_1 >= MÅL_POENG:
                     avslutningen("Spiller 1", self.poeng_1, RØD)
-                elif self.poeng_2 >= 50:
+                elif self.poeng_2 >= MÅL_POENG:
                     avslutningen("Spiller 2", self.poeng_2, GRØNN)
                     
                 pg.mixer.music.set_volume(1.0)
@@ -304,7 +304,7 @@ class Spillbrett:
                 
                 if eksplosjonen:
                     if objekt.eksplosjon:
-                        spiller.eksplosjoner.append(Eksplosjon(objekt.senter[0], objekt.senter[1], self.overflate))
+                        spiller.eksplosjoner.append(Eksplosjon(objekt.senter[0], objekt.senter[1]))
                         liste.remove(objekt)
             
                 if objekt.senter[0] <= 0 or objekt.senter[0] >= BREDDE:
@@ -323,7 +323,7 @@ class Spillbrett:
         def spiller_eksplosjon(spiller):
             if spiller.rect.x + SPILLER_BREDDE/2 < eksplosjon.x:
                 spiller.fart[0] -= 10
-            if spiller.rect.x > eksplosjon.x:
+            if spiller.rect.x + SPILLER_BREDDE/2 > eksplosjon.x:
                 spiller.fart[0] += 10
         
         # Oppdaterer eksplosjoner
@@ -449,7 +449,7 @@ class Spillbrett:
         self.tegne_taster_startskjerm()
         
         self.tegne_info_nede(f"The shooter", 40, font = FONT1)
-        self.tegne_info_nede(f"Mål: førstemann til 100 poeng", 80)
+        self.tegne_info_nede(f"Mål: førstemann til {MÅL_POENG} poeng", 80)
 
         self.tegne_info_nede(f"+{POENG_SKUDD} poeng for å skyte den andre spilleren, +{POENG_GRANAT} poeng til den andre spilleren når man treffer granat", 460)
         self.tegne_info_nede(f"+{POENG_PENGE} poeng for å plukke opp pengen", 490)
