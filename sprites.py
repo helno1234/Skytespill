@@ -85,6 +85,8 @@ class Spiller:
 class SpillerH(Spiller):
     def __init__(self):
         super().__init__()
+        self.bilde_logo = pg.Surface((30, 50))
+        self.bilde_logo.fill(GRØNN)
 
         self.bilde = pg.transform.scale(pg.image.load("Luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
         
