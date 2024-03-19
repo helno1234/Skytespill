@@ -88,7 +88,7 @@ class SpillerH(Spiller):
         self.bilde_logo = pg.Surface((30, 50))
         self.bilde_logo.fill(GRØNN)
 
-        self.bilde = pg.transform.scale(pg.image.load("bilder/Luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        self.bilde = pg.transform.scale(pg.image.load("../bilder/Luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
         
         self.rect = self.bilde.get_rect()
     
@@ -115,7 +115,7 @@ class SpillerH(Spiller):
 class SpillerV(Spiller):
     def __init__(self):
         super().__init__()
-        self.bilde = pg.transform.scale(pg.image.load("bilder/mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        self.bilde = pg.transform.scale(pg.image.load("../bilder/mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
         self.rect = self.bilde.get_rect()
         self.rect.center = (
             10, 0
@@ -258,7 +258,7 @@ class Granat:
             elif self.truffet_bakken:
                 self.ny_tid = time.time()
                 if self.ny_tid - self.start_tiden >= VENTE_EKSPLOSJON:
-                    eksplosjon_lyd = pg.mixer.Sound("lyd/eksplosjon_lydeffekt_2.mp3")
+                    eksplosjon_lyd = pg.mixer.Sound("../lyd/eksplosjon_lydeffekt_2.mp3")
                     eksplosjon_lyd.set_volume(0.5)
                     eksplosjon_lyd.play()
                     # Klar for å eksplodere
