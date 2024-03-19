@@ -48,7 +48,7 @@ class Spillbrett:
         self.ikke_tom_ammo = True
         self.granat = False
         
-        pg.mixer.music.load("battle-music.mp3")
+        pg.mixer.music.load("lyd/battle-music.mp3")
         pg.mixer.music.set_volume(0.3)
         pg.mixer.music.play(fade_ms = 10000, loops=10)
     
@@ -240,7 +240,7 @@ class Spillbrett:
              
     def opprett_kule(self, spiller, radius, retning_venstre, i = 0):
         # Lager skudd-lyd når det blir skutt en kule
-        skudd_lyd = pg.mixer.Sound("skudd.mp3")
+        skudd_lyd = pg.mixer.Sound("lyd/skudd.mp3")
         skudd_lyd.set_volume(0.1)
         skudd_lyd.play()
         
@@ -278,7 +278,7 @@ class Spillbrett:
             for spiller in self.spillere:
                 if spiller.rect.colliderect(self.penge_objekt.rect):
                     # Spiller "penge"-lyd som symboliserer at en spiller har tatt pengen
-                    skudd_lyd = pg.mixer.Sound("ta_penge.mp3")
+                    skudd_lyd = pg.mixer.Sound("lyd/ta_penge.mp3")
                     skudd_lyd.set_volume(0.7)
                     skudd_lyd.play()
                     
@@ -475,6 +475,7 @@ class Spillbrett:
             (tast.x + TAST_BREDDE/2 - FONT1.size(bokstav)[0]/2, tast.y + TAST_HØYDE/2 - FONT1.size(bokstav)[1]/2))
             
         def taster_i_listen(i,j,k, y_pos, gyldighet = False):
+            
             tast = Tast_startskjerm(self.sentrere_tekst(FONT1.render("Spiller 1", True, HVIT),
                                                         gyldig=gyldighet) + FONT1.size("Spiller 1")[0]/2 + i * (TAST_BREDDE * (1/2 + j) + TAST_AVSTAND * k),
                                                         y_pos)
@@ -671,7 +672,7 @@ class Spillbrett:
         if poeng < int(priser[spiller.gyldig]):
             spiller.gyldig_farge = RØD
         else:
-            skudd_lyd = pg.mixer.Sound("kjøpe_oppgradering.mp3")
+            skudd_lyd = pg.mixer.Sound("lyd/kjøpe_oppgradering.mp3")
             skudd_lyd.set_volume(0.5)
             skudd_lyd.play()
         
