@@ -46,7 +46,7 @@ PENGE_BREDDE = 30
 PENGE_HØYDE = 30
 
 # Spillrunder (sek)
-SPILLRUNDER_TID = 3
+SPILLRUNDER_TID = 30
 
 # Bredde og høyde for taster (startskjerm)
 TAST_BREDDE = 40
@@ -68,3 +68,5 @@ STOR_FONT = pg.font.Font(None, 100)
 LITT_STOR_FONT = pg.font.Font(None, 70)
 
 MÅL_POENG = 50
+
+FORHOLD_BILDER_BREDDE = 35/29

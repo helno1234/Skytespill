@@ -4,9 +4,6 @@ from settings import *
 
 class Spiller:
     def __init__(self):        
-        self.bilde_logo = pg.Surface((30, 50))
-        self.bilde_logo.fill(RØD)
-        
         self.fart = [0, 0]
         self.aks = [0, 0]
         
@@ -76,19 +73,31 @@ class Spiller:
         # Bevegelseslikning i y-retning
         self.fart[1] += self.aks[1]
         self.pos[1] += self.fart[1] + 0.5*self.aks[1]
+            
+    
         
         # Oppdaterer spillerens posisjon
         self.rect.x = self.pos[0]
         self.rect.y = self.pos[1]
 
-# Subklasse for spillobjekt som bruker piltaster
+# Subklasse for spillobjekt rsom bruker piltaster
 class SpillerH(Spiller):
     def __init__(self):
         super().__init__()
         self.bilde_logo = pg.Surface((30, 50))
         self.bilde_logo.fill(GRØNN)
-
-        self.bilde = pg.transform.scale(pg.image.load("../bilder/Luigi.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        
+        self.bilder_v = [pg.transform.scale(pg.image.load("../bilder/luigi_v.png"), (SPILLER_BREDDE, SPILLER_HØYDE)),
+                         pg.transform.scale(pg.image.load("../bilder/luigi_skritt_1.png"), (SPILLER_BREDDE, SPILLER_HØYDE))]
+        self.bilder_h = [pg.transform.scale(pg.image.load("../bilder/luigi_h.png"), (SPILLER_BREDDE, SPILLER_HØYDE)),
+                         pg.transform.scale(pg.image.load("../bilder/luigi_skritt_2.png"), (SPILLER_BREDDE, SPILLER_HØYDE))]
+    
+        self.indeks = 0
+        self.teller_skritt = 0
+        self.bilde_v = self.bilder_v[self.indeks]
+        self.bilde_h = self.bilder_h[self.indeks]
+        
+        self.bilde = self.bilde_v
         
         self.rect = self.bilde.get_rect()
     
@@ -100,22 +109,77 @@ class SpillerH(Spiller):
         
     def oppdater(self):
         super().oppdater()
+            
         self.aks = [0, GRAV]
+        self.skritt_cooldown = 0.1
         
         # Henter tastene fra tastaturet
         keys = pg.key.get_pressed()
         if keys[pg.K_j]:
             self.aks[0] = -SPILLER_AKS
             self.retning_venstre = True
+            self.teller_skritt += 1
         if keys[pg.K_l]:
             self.aks[0] = SPILLER_AKS
             self.retning_venstre = False
-                 
+            self.teller_skritt += 1
+        if not keys[pg.K_j] and not keys[pg.K_l]:
+            self.teller_skritt = 0
+            self.indeks = 0
+            if self.retning_venstre:
+                self.bilde_v = self.bilder_v[self.indeks]
+            else:
+                self.bilde_h = self.bilder_h[self.indeks]
+            
+            
+        # Håndterer animasjon
+        if self.teller_skritt > self.skritt_cooldown:
+            self.indeks += 1
+            if self.indeks >= len(self.bilder_v):
+                self.indeks = 0
+            if self.retning_venstre:
+                self.bilde_v = self.bilder_v[self.indeks]
+            else:
+                self.bilde_h = self.bilder_h[self.indeks]
+                
+        if self.retning_venstre:
+            self.bilde = self.bilde_v
+        else:
+            self.bilde = self.bilde_h
+        
+        if self.fart[1] != 0.4:
+            if self.retning_venstre:
+                self.bilde = pg.transform.scale(pg.image.load("../bilder/luigi_hopp_v.png"), (SPILLER_BREDDE*FORHOLD_BILDER_BREDDE, SPILLER_HØYDE))
+            else:
+                self.bilde = pg.transform.scale(pg.image.load("../bilder/luigi_hopp_h.png"), (SPILLER_BREDDE*FORHOLD_BILDER_BREDDE, SPILLER_HØYDE))
+            
+    def hopp(self):
+        self.fart[1] = -13
+        #self.bilde = pg.transform.scale(pg.image.load("../bilder/luigi_hopp.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+
 # Klasse for spillobjekt som bruker piltaster
 class SpillerV(Spiller):
     def __init__(self):
         super().__init__()
-        self.bilde = pg.transform.scale(pg.image.load("../bilder/mario.png"), (SPILLER_BREDDE, SPILLER_HØYDE))
+        self.bilde_logo = pg.Surface((30, 50))
+        self.bilde_logo.fill(RØD)
+        
+        self.luigi = False
+        
+        self.bilder_v = [pg.transform.scale(pg.image.load("../bilder/mario_v.png"), (SPILLER_BREDDE, SPILLER_HØYDE)),
+                         pg.transform.scale(pg.image.load("../bilder/mario_skritt_1.png"), (SPILLER_BREDDE, SPILLER_HØYDE))]
+        self.bilder_h = [pg.transform.scale(pg.image.load("../bilder/mario_h.png"), (SPILLER_BREDDE, SPILLER_HØYDE)),
+                         pg.transform.scale(pg.image.load("../bilder/mario_skritt_2.png"), (SPILLER_BREDDE, SPILLER_HØYDE))]
+    
+        self.indeks = 0
+        self.teller_skritt = 0
+        self.bilde_v = self.bilder_v[self.indeks]
+        self.bilde_h = self.bilder_h[self.indeks]
+        
+        self.retning_venstre = False 
+            
+        self.bilde = self.bilde_h
+        
         self.rect = self.bilde.get_rect()
         self.rect.center = (
             10, 0
@@ -126,14 +190,47 @@ class SpillerV(Spiller):
         super().oppdater()
         self.aks = [0, GRAV]
         
+        self.skritt_cooldown = 0.1
+        
         # Henter tastene fra tastaturet
         keys = pg.key.get_pressed() 
         if keys[pg.K_a]:
             self.aks[0] = -SPILLER_AKS
-            self.retning_venstre = True 
+            self.retning_venstre = True
+            self.teller_skritt += 1
         if keys[pg.K_d]:
             self.aks[0] = SPILLER_AKS
-            self.retning_venstre = False 
+            self.retning_venstre = False
+            self.teller_skritt += 1
+        if not keys[pg.K_d] and not keys[pg.K_a]:
+            self.teller_skritt = 0
+            self.indeks = 0
+            if self.retning_venstre:
+                self.bilde_v = self.bilder_v[self.indeks]
+            else:
+                self.bilde_h = self.bilder_h[self.indeks]
+            
+            
+        # Håndterer animasjon
+        if self.teller_skritt > self.skritt_cooldown:
+            self.indeks += 1
+            if self.indeks >= len(self.bilder_v):
+                self.indeks = 0
+            if self.retning_venstre:
+                self.bilde_v = self.bilder_v[self.indeks]
+            else:
+                self.bilde_h = self.bilder_h[self.indeks]
+            
+        if self.retning_venstre:
+            self.bilde = self.bilde_v
+        else:
+            self.bilde = self.bilde_h
+            
+        if self.fart[1] != 0.4:
+            if self.retning_venstre:
+                self.bilde = pg.transform.scale(pg.image.load("../bilder/mario_hopp_v.png"), (SPILLER_BREDDE*FORHOLD_BILDER_BREDDE, SPILLER_HØYDE))
+            else:
+                self.bilde = pg.transform.scale(pg.image.load("../bilder/mario_hopp_h.png"), (SPILLER_BREDDE*FORHOLD_BILDER_BREDDE, SPILLER_HØYDE))
 
 class Platform:
     def __init__(self, x, y, b, h):

@@ -194,7 +194,7 @@ class Spillbrett:
                     # Kan kun hoppe dersom spilleren er nede på bakken
                     if self.spiller_1.fart[1] == 0:
                         self.spiller_1.hopp()
-                
+                 
                 # Spiller 2 skal hoppe hvis vi trykker på mellomromstasten
                 if hendelse.key == pg.K_i:
                     # Kan kun hoppe dersom spilleren er nede på bakken
